@@ -75,10 +75,8 @@ print_cell( const struct m3_cell cell )
             printf("-");
             break;
         case ( cell_mask_wall | cell_mask_wall_right ):
-            printf(">");
-            break;
         case ( cell_mask_wall | cell_mask_wall_left ):
-            printf("<");
+            printf("|");
             break;
 
         case ( cell_mask_color | cell_mask_color_red ):
@@ -165,11 +163,6 @@ match_cell( const struct m3_options options,
 }
 
 
-
-
-
-
-
 void
 print_board( const struct m3_cell cell )
 {
@@ -196,8 +189,13 @@ print_board( const struct m3_cell cell )
 
 }
 
+void
+unique_star_cell( struct m3_cell* cell )
+{
 
-// TODO add seed
+}
+
+
 void
 rand_cell( struct m3_cell* cell )
 {
@@ -230,7 +228,6 @@ rand_cell( struct m3_cell* cell )
 }
 
 
-// TODO add seed
 void
 rand_board( struct m3_cell* cell )
 {
@@ -257,6 +254,8 @@ rand_board( struct m3_cell* cell )
 }
 
 // subject and target will become NULL if cant swap
+// TODO  swap_to_match would only swap when a match can happen
+// TODO swap_freedom would let a user do a swap even when there would be no match
 void
 swap( struct m3_cell**   subject,
       struct m3_cell**   target )
@@ -434,7 +433,6 @@ match_right( const struct m3_options  options,
     {
         print_neighbours( *cell );
         printf("\nits right a match %02X %d\n", cell->category, match_count );
-        print_board( *cell );
 
         // TODO undo
         *matched = cell;
@@ -447,7 +445,7 @@ match_right( const struct m3_options  options,
 // match help cannot detect horizontal or vertical matches since the match starts at the cell
 void
 match_help( const struct m3_options options,
-            struct m3_cell          cell,
+            struct m3_cell*         cell,
             const struct m3_cell**  swap_subject,
             const struct m3_cell**  swap_target )
 {
@@ -458,8 +456,8 @@ match_help( const struct m3_options options,
     struct m3_cell* subject  = NULL;
     struct m3_cell* target   = NULL;
 
-    const struct m3_cell* cell_left_most    = &cell;
-    const struct m3_cell* cell_current      = &cell;
+    const struct m3_cell* cell_left_most    = cell;
+    const struct m3_cell* cell_current      = cell;
 
     const struct m3_cell* matched   = NULL;
 
@@ -479,12 +477,11 @@ match_help( const struct m3_options options,
 
             matched = NULL;
 
-
             swap_routines[i]( &subject, &target );
 
             if( subject != NULL && target != NULL )
             {
-                match( options, &cell, &matched );
+                match( options, cell, &matched );
 
                 // Always undo the swap
                 swap_routines[i]( &subject, &target );
@@ -658,8 +655,7 @@ print_board_info( const struct m3_cell cell )
 }
 
 
-// currently broke with grid of 5x4 for sure problem in the match function
-// 1614286857
+// TODO find a way that seeds would work post shuffle, so that when you put in a seed it wouldnt have to shuffle the board
 int
 main( int argc, char* argv[] )
 {
@@ -685,7 +681,7 @@ main( int argc, char* argv[] )
 
     struct m3_cell* built_cell = NULL;
 
-    build_board(5, 4, &built_cell );
+    build_board(20, 8, &built_cell );
 
     rand_board( built_cell->top->left );
 
@@ -707,7 +703,7 @@ main( int argc, char* argv[] )
     const struct m3_cell* swap_subject = NULL;
     const struct m3_cell* swap_target = NULL;
 
-    match_help( options, *built_cell, &swap_subject, &swap_target );
+    match_help( options, built_cell, &swap_subject, &swap_target );
 
     if( swap_subject == NULL && swap_target == NULL )
     {
@@ -724,7 +720,7 @@ main( int argc, char* argv[] )
     }
 
 
-    // print_board_info( *built_cell->top->left );
+    printf("seed %d\n", seed );
     printf("done\n");
 
     return 0;
