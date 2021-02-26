@@ -4,20 +4,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-struct m3_options {
-    int seed;
-    uint8_t matches_required_to_clear;
-};
-
-struct m3_cell;
-
-typedef void(match_routine)( const struct m3_options    options,
-                             const struct m3_cell*      self,
-                             const struct m3_cell**     matched );
-
-typedef void(swap_routine)( struct m3_cell**   subject,
-                            struct m3_cell**   target );
-
 enum cell_masks {
     cell_mask_wall              = (1 << 7),
     cell_mask_wall_undefined    = (0 << 0),
@@ -35,6 +21,28 @@ enum cell_masks {
     cell_mask_color_purple      = (1 << 4),
 };
 
+
+
+// TODO colors array should be part of options so i can add remove colors to increase, decrease diffculty
+struct m3_options {
+    int     seed;
+    uint8_t columns;
+    uint8_t rows;
+    uint8_t matches_required_to_clear;
+    enum cell_masks* colors;
+    size_t colors_size;
+};
+
+struct m3_cell;
+
+typedef void(match_routine)( const struct m3_options    options,
+                             const struct m3_cell*      self,
+                             const struct m3_cell**     matched );
+
+typedef void(swap_routine)( struct m3_cell**   subject,
+                            struct m3_cell**   target );
+
+
 struct m3_cell {
     uint8_t             category;
 
@@ -45,7 +53,6 @@ struct m3_cell {
 
     match_routine*      right_routine;
     match_routine*      bottom_routine;
-
 };
 
 #define M3_CELL_CONST { \
@@ -189,39 +196,73 @@ print_board( const struct m3_cell cell )
 
 }
 
-void
-unique_star_cell( struct m3_cell* cell )
+int
+unique_star_cell_compar( const void* a, const void* b)
 {
+    return rand();
+}
+
+void
+unique_star_cell( const struct m3_options*  options,
+                  struct m3_cell*           cell )
+{
+    assert( options );
+    assert( cell );
+
+
+    struct m3_cell* cells[] = {
+        cell->top,
+        cell->right,
+        cell->bottom,
+        cell->left,
+        cell
+    };
+
+    qsort( options->colors,
+           options->colors_size / sizeof( enum cell_masks ),
+           sizeof( enum cell_masks ),
+           &unique_star_cell_compar );
+
+    uint8_t const_colors_count = options->colors_size / sizeof( enum cell_masks );
+    uint8_t colors_count = const_colors_count;
+
+    for( uint8_t i = 0; i < sizeof( cells ) / sizeof( struct m3_cells* ); i++ )
+    {
+        if( ( cells[i]->category & cell_mask_color ) == cell_mask_color )
+        {
+            cells[i]->category = cell_mask_color | options->colors[--colors_count];
+
+
+            if( colors_count == 0 )
+            {
+                colors_count = const_colors_count;
+            }
+        }
+    }
 
 }
 
 
 void
-rand_cell( struct m3_cell* cell )
+rand_cell( const struct m3_options*     options,
+           struct m3_cell*              cell )
 {
+    assert( options );
     assert( cell );
 
-    enum cell_masks colors[] = {
-        cell_mask_color_red,
-        cell_mask_color_green,
-        cell_mask_color_blue,
-        cell_mask_color_yellow,
-        cell_mask_color_purple
-    };
-
     int rand_color = 0;
-    static const double color_range = RAND_MAX / ( sizeof( colors ) / sizeof( enum cell_masks ) );
+    double color_range = RAND_MAX / ( options->colors_size / sizeof( enum cell_masks ) );
 
 
     if( ( cell->category & cell_mask_color ) == cell_mask_color )
     {
         rand_color = rand();
 
-        for( uint8_t c = 0; c < sizeof( colors ) / sizeof( enum cell_masks ); c++ )
+        for( uint8_t c = 0; c < options->colors_size / sizeof( enum cell_masks ); c++ )
         {
             if( rand_color >= color_range * c && rand_color < ( color_range * (c+1) ) )
             {
-                cell->category = ( cell_mask_color | colors[c] );
+                cell->category = ( cell_mask_color | options->colors[c] );
             }
         }
     }
@@ -229,7 +270,8 @@ rand_cell( struct m3_cell* cell )
 
 
 void
-rand_board( struct m3_cell* cell )
+rand_board( const struct m3_options*    options,
+            struct m3_cell*             cell )
 {
 
     assert( cell );
@@ -239,7 +281,7 @@ rand_board( struct m3_cell* cell )
 
     while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
     {
-        rand_cell( cell_current );
+        rand_cell( options, cell_current );
 
         if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
         {
@@ -376,24 +418,35 @@ match( const struct m3_options  options,
 
 
 void
-match_bottom( const struct m3_options  options,
-              const struct m3_cell*    cell,
-              const struct m3_cell**   matched )
+match_vertical( const struct m3_options  options,
+                const struct m3_cell*    cell,
+                const struct m3_cell**   matched )
 {
     assert( cell );
+    assert( cell->top );    
     assert( cell->bottom );
     assert( matched );
 
 
     uint8_t match_count = 1;
-    struct m3_cell cell_current = *cell;
-    struct m3_cell cell_bottom = *cell->bottom;
+    const struct m3_cell* cell_current = cell;
+    const struct m3_cell* cell_top = cell->top;
+    const struct m3_cell* cell_bottom = cell->bottom;
 
-    while( cell_current.category == cell_bottom.category )
+    while( cell_current->category == cell_top->category )
+    {
+        match_count++;
+        cell_current = cell_top;
+        cell_top = cell_top->top;
+    }
+
+    cell_current = cell;
+
+    while( cell_current->category == cell_bottom->category )
     {
         match_count++;
         cell_current = cell_bottom;
-        cell_bottom = *cell_bottom.bottom;
+        cell_bottom = cell_bottom->bottom;
     }
 
 
@@ -408,23 +461,35 @@ match_bottom( const struct m3_options  options,
 }
 
 void
-match_right( const struct m3_options  options,
-             const struct m3_cell*    cell,
-             const struct m3_cell**   matched )
-{
+match_horizontal( const struct m3_options  options,
+                  const struct m3_cell*    cell,
+                  const struct m3_cell**   matched )
+    {
     assert( cell );
     assert( cell->right );
+    assert( cell->left );
     assert( matched );
 
     uint8_t match_count = 1;
-    struct m3_cell cell_current = *cell;
-    struct m3_cell cell_right = *cell->right;
+    const struct m3_cell* cell_current = cell;
+    const struct m3_cell* cell_right = cell->right;
+    const struct m3_cell* cell_left = cell->left;
 
-    while( cell_current.category == cell_right.category )
+    while( cell_current->category == cell_right->category )
     {
         match_count++;
         cell_current = cell_right;
-        cell_right = *cell_current.right;
+        cell_right = cell_current->right;
+
+    }
+
+    cell_current = cell;
+
+    while( cell_current->category == cell_left->category )
+    {
+        match_count++;
+        cell_current = cell_left;
+        cell_left = cell_current->left;
 
     }
 
@@ -509,11 +574,14 @@ match_help( const struct m3_options options,
 }
 
 void
-build_board( uint8_t            columns,
-             uint8_t            rows,
+board_build( struct m3_options options,
              struct m3_cell**   cell )
 {
     assert( cell );
+
+    uint8_t columns = options.columns;
+    uint8_t rows = options.rows;
+
     assert( columns > 0 );
     assert( rows > 0 );
 
@@ -533,7 +601,6 @@ build_board( uint8_t            columns,
 
     cell_wall_undefined = malloc( sizeof( struct m3_cell ) );
     assert( cell_wall_undefined );
-
     *cell_wall_undefined = const_cell_wall_undefined;
 
     cell_wall_undefined->top    = cell_wall_undefined;
@@ -586,8 +653,8 @@ build_board( uint8_t            columns,
                 r < ( rows - 1 ) )
             {
                 cell_category |= cell_mask_color | cell_mask_color_undefined;
-                cell_current->right_routine = &match_right;
-                cell_current->bottom_routine = &match_bottom;
+                cell_current->right_routine = &match_horizontal;
+                cell_current->bottom_routine = &match_vertical;
 
                 // The output cell is assigned to the first color cell
                 if( *cell == NULL )
@@ -627,6 +694,39 @@ build_board( uint8_t            columns,
         cell_top        = cell_wall_undefined;
 
     } // for columns
+}
+
+void
+board_destroy( struct m3_cell* cell )
+{
+    assert( cell );
+
+    struct m3_cell* cell_left_most    = cell;
+    struct m3_cell* cell_current      = cell;
+    struct m3_cell* cell_free         = NULL;
+
+    while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    {
+        cell_free = cell_current;
+
+        if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
+        {
+            cell_current = cell_left_most->bottom;
+            cell_left_most = cell_current;
+        }
+        else
+        {
+            cell_current = cell_current->right;
+        }
+
+        free( cell_free );
+    } // while
+
+
+    if( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    {
+        free( cell_current );
+    }
 }
 
 void
@@ -674,16 +774,28 @@ main( int argc, char* argv[] )
     printf("seed %d\n", seed );
     srand( seed );
 
+    enum cell_masks colors[] = {
+        cell_mask_color_red,
+        cell_mask_color_green,
+        cell_mask_color_blue,
+        cell_mask_color_yellow,
+        cell_mask_color_purple
+    };
+
     const struct m3_options options = {
         seed,
-        3
+        9, // columns
+        8, // rows
+        3,
+        colors,
+        sizeof( colors )
     };
 
     struct m3_cell* built_cell = NULL;
 
-    build_board(20, 8, &built_cell );
+    board_build(options, &built_cell );
 
-    rand_board( built_cell->top->left );
+    rand_board( &options, built_cell->top->left );
 
     // Assigning first cell just because easy to do the loop that way
     struct m3_cell* matched = built_cell;
@@ -691,8 +803,15 @@ main( int argc, char* argv[] )
     // Shuffling the board so that there is no automatic match
     while( matched != NULL )
     {
-        rand_cell( matched );
+        unique_star_cell( &options, matched );
+        struct m3_cell* shuffled_cell = matched;
         matched = NULL;
+
+        while( matched != NULL )
+        {
+            match_cell( options, shuffled_cell, (const struct m3_cell**)&matched );
+        }
+
         match( options, built_cell, (const struct m3_cell**)&matched );
         print_board( *built_cell->top->left );
         printf("\n");
@@ -721,6 +840,8 @@ main( int argc, char* argv[] )
 
 
     printf("seed %d\n", seed );
+
+    board_destroy( built_cell->top->left );
     printf("done\n");
 
     return 0;

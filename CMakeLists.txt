@@ -1,4 +1,4 @@
 
 project( match3 )
 
-add_executable( match3 match3.c )
+add_subdirectory( src/match3 )
