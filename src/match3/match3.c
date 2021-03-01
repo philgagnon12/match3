@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 #include <match3/cell.h>
 #include <match3/match.h>
@@ -103,7 +104,8 @@ print_board( const struct m3_cell cell )
 int
 unique_star_cell_compar( const void* a, const void* b)
 {
-    return rand();
+    int rand_int = rand();
+    return rand_int;
 }
 
 void
@@ -382,23 +384,60 @@ print_board_info( const struct m3_cell cell )
 }
 
 
+void
+usage(int argc, char* argv[])
+{
+    printf("%s\n", argv[0]);
+    printf("%s ", argv[0]);
+    printf("[seed] [columns rows]\n");
+
+    printf("%s ", argv[0]);
+    printf("[columns rows]\n");
+}
+
 // TODO find a way that seeds would work post shuffle, so that when you put in a seed it wouldnt have to shuffle the board
 int
 main( int argc, char* argv[] )
 {
 
     int seed = 0;
+    int columns = 10;
+    int rows = 6;
 
-    if( argc < 2 )
+    seed = (int)time(NULL);
+
+    for( int i = 0; i < argc; i++ )
     {
-        seed = (int)time(NULL);
+        if( 0 == strcmp( "--help", argv[i]) )
+        {
+            usage(argc, argv);
+            return 0;
+        }
     }
-    else
+
+    if( argc == 2 )
     {
         seed = atoi( argv[1] );
     }
 
+    if( argc == 3 )
+    {
+        seed = (int)time(NULL);
+        columns = atoi( argv[1] );
+        rows = atoi( argv[2] );
+
+    }
+
+    if( argc > 3 )
+    {
+        seed = atoi( argv[1] );
+        columns = atoi( argv[2] );
+        rows = atoi( argv[3] );
+    }
+
     printf("seed %d\n", seed );
+    printf("columns %d\n", columns );
+    printf("rows %d\n", rows );
     srand( seed );
 
     enum cell_masks colors[] = {
@@ -411,8 +450,8 @@ main( int argc, char* argv[] )
 
     const struct m3_options options = {
         seed,
-        9, // columns
-        8, // rows
+        columns, // columns
+        rows, // rows
         3,
         colors,
         sizeof( colors )

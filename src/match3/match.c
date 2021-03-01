@@ -77,6 +77,7 @@ match( const struct m3_options    options,
     assert( cell );
     assert( match_result );
 
+
     struct m3_cell* neighbours[] = {
         cell->bottom,
         cell->right
