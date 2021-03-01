@@ -64,6 +64,7 @@ struct m3_cell {
     struct m3_cell*     right;
     struct m3_cell*     bottom;
     struct m3_cell*     left;
+    struct m3_cell*     next;
 
     match_routine*      right_routine;
     match_routine*      bottom_routine;
@@ -71,6 +72,7 @@ struct m3_cell {
 
 #define M3_CELL_CONST { \
     cell_mask_wall | cell_mask_wall_undefined,   \
+    NULL,   \
     NULL,   \
     NULL,   \
     NULL,   \

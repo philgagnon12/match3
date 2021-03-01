@@ -8,7 +8,7 @@
 #include <match3/cell.h>
 #include <match3/match.h>
 
-
+// TODO i could keep count of the amount of colors chosen at random and keep it balanced, could avoid collisions ?
 
 void
 print_cell( const struct m3_cell cell )
@@ -182,22 +182,16 @@ rand_board( const struct m3_options*    options,
 
     assert( cell );
 
-    struct m3_cell* cell_left_most    = cell;
     struct m3_cell* cell_current      = cell;
 
-    while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    while( cell_current != NULL )
     {
-        rand_cell( options, cell_current );
+        if( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+        {
+            rand_cell( options, cell_current );
+        }
 
-        if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
-        {
-            cell_current = cell_left_most->bottom;
-            cell_left_most = cell_current;
-        }
-        else
-        {
-            cell_current = cell_current->right;
-        }
+        cell_current = cell_current->next;
     }
 }
 
@@ -226,6 +220,7 @@ board_build( struct m3_options options,
     struct m3_cell* cell_right      = NULL;
     struct m3_cell* cell_bottom     = NULL;
     struct m3_cell* cell_left       = NULL;
+    struct m3_cell* cell_previous   = NULL;
 
 
     cell_wall_undefined = malloc( sizeof( struct m3_cell ) );
@@ -307,6 +302,13 @@ board_build( struct m3_options options,
             cell_current->left = cell_left;
             cell_left->right = cell_current;
 
+            if( cell_previous != NULL )
+            {
+                cell_previous->next = cell_current;
+            }
+
+            cell_previous = cell_current;
+
             // Setting up for next cell
             cell_top = cell_current;
             cell_left = cell_left->bottom;
@@ -383,6 +385,42 @@ print_board_info( const struct m3_cell cell )
     } // while
 }
 
+
+void
+board_shuffle( const struct m3_options*     options,
+               struct m3_cell*              cell )
+{
+    assert( options );
+    assert( cell );
+
+    struct m3_match_result matched_result = M3_MATCH_RESULT_CONST;
+    // Assigning to options.matches_required_to_clear just because easy to do the loop that way
+    matched_result.matched_count = options->matches_required_to_clear;
+
+    struct m3_cell* matched_result_first_cell = cell;
+
+    // Shuffling the board so that there is no automatic match
+    while( matched_result.matched_count >= options->matches_required_to_clear )
+    {
+        while( matched_result.matched_count >= options->matches_required_to_clear )
+        {
+            matched_result.matched_count = 1;
+            rand_cell( options, matched_result_first_cell );
+            match_cell( *options, matched_result_first_cell, &matched_result );
+            matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
+        }
+
+        match( *options, matched_result_first_cell, &matched_result );
+        matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
+        //print_board( *cell->top->left );
+        //printf("\n");
+
+    }
+
+    match_result_destroy(&matched_result);
+
+    printf("shuffled\n");
+}
 
 void
 usage(int argc, char* argv[])
@@ -464,35 +502,11 @@ main( int argc, char* argv[] )
     rand_board( &options, built_cell->top->left );
 
     
+    board_shuffle( &options, built_cell );
 
-
-    struct m3_match_result matched_result = M3_MATCH_RESULT_CONST;
-    // Assigning to options.matches_required_to_clear just because easy to do the loop that way
-    matched_result.matched_count = options.matches_required_to_clear;
-
-    struct m3_cell* matched_result_first_cell = built_cell;
-
-    // Shuffling the board so that there is no automatic match
-    while( matched_result.matched_count >= options.matches_required_to_clear )
-    {
-        while( matched_result.matched_count >= options.matches_required_to_clear )
-        {
-            matched_result.matched_count = 1;
-            unique_star_cell( &options, matched_result_first_cell );
-            match_cell( options, matched_result_first_cell, &matched_result );
-            matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
-        }
-
-        match( options, built_cell, &matched_result );
-        matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
-        print_board( *built_cell->top->left );
-        printf("\n");
-    }
-
-    // TODO match_result_destroy()
-    match_result_destroy(&matched_result);
-
-    printf("shuffled\n");
+    print_board( *built_cell->top->left );
+    printf("\n");
+    
 
     const struct m3_cell* swap_subject = NULL;
     const struct m3_cell* swap_target = NULL;

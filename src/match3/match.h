@@ -24,7 +24,6 @@ match( const struct m3_options    options,
        const struct m3_cell*      cell,
        struct m3_match_result*    match_result );
 
-
 void
 match_cell( const struct m3_options options,
             const struct m3_cell*   cell,

@@ -78,38 +78,21 @@ match( const struct m3_options    options,
     assert( match_result );
 
 
-    struct m3_cell* neighbours[] = {
-        cell->bottom,
-        cell->right
-    };
+    const struct m3_cell* cell_current      = cell;
 
-    if( ( cell->category & cell_mask_wall ) == cell_mask_wall )
+    while( cell_current != NULL )
     {
-        return;
-    }
-
-    match_result_init( match_result, cell);
-
-    match_cell( options, cell, match_result );
-
-    if( match_result->matched_count >= options.matches_required_to_clear )
-    {
-        return;
-    }
-
-    for( int i = 0; i < sizeof( neighbours ) / sizeof( struct m3_cell* ); i++ )
-    {
-
-        // Make sure neighbours are not NULL
-        assert( neighbours[i] );
-
-        // Recursively match
-        match( options, neighbours[i], match_result );
-
-        if( match_result->matched_count >= options.matches_required_to_clear )
+        if( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
         {
-            return;
+            match_cell( options, cell_current, match_result );
+
+            if( match_result->matched_count >= options.matches_required_to_clear )
+            {
+                return;
+            }
         }
+
+        cell_current = cell_current->next;
     }
 }
 
@@ -132,8 +115,6 @@ match_cell( const struct m3_options options,
     {
         return;
     }
-
-    match_result_init( match_result, cell);
 
     for( int i = 0; i < sizeof( routines ) / sizeof( match_routine* ); i++ )
     {
@@ -198,12 +179,12 @@ match_vertical( const struct m3_options  options,
     if( match_count >= options.matches_required_to_clear )
     {
         
-        printf("\nits bottom a match %02X %d\n", cell->category, match_count );
+        // printf("\nits bottom a match %02X %d\n", cell->category, match_count );
 
-        for( uint8_t i = 0; i < match_result->matched_count; i++ )
-        {
-            print_neighbours( *match_result->matched[i] );
-        }
+        // for( uint8_t i = 0; i < match_result->matched_count; i++ )
+        // {
+        //     print_neighbours( *match_result->matched[i] );
+        // }
 
     }
 }
@@ -252,12 +233,12 @@ match_horizontal( const struct m3_options  options,
 
     if( match_count >= options.matches_required_to_clear )
     {
-        printf("\nits right a match %02X %d\n", cell->category, match_count );
+        // printf("\nits right a match %02X %d\n", cell->category, match_count );
 
-        for( uint8_t i = 0; i < match_result->matched_count; i++ )
-        {
-            print_neighbours( *match_result->matched[i] );
-        }
+        // for( uint8_t i = 0; i < match_result->matched_count; i++ )
+        // {
+        //     print_neighbours( *match_result->matched[i] );
+        // }
     }
 }
 
