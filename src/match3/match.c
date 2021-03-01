@@ -4,17 +4,78 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "match3/cell.h"
 #include "match3/match.h"
 #include "match3/swap.h"
 
+void
+match_result_init( struct m3_match_result*    match_result,
+                   const struct m3_cell*      cell )
+{
+    assert(match_result);
+    assert(cell);
+
+    if( match_result->matched == NULL )
+    {
+        match_result->matched = malloc( sizeof( struct m3_cell* ) );
+        assert( match_result->matched );
+        match_result->matched_size = sizeof( struct m3_cell* );
+    }
+
+    // Reset
+    for( uint8_t i = 0; i < match_result->matched_size / sizeof(struct m3_cell* ); i++ )
+    {
+        match_result->matched[i] = NULL;
+    }
+
+    match_result->matched[0] = cell;
+    match_result->matched_count = 1;
+}
+
+
+void
+match_result_add_match( struct m3_match_result*    match_result,
+                        const struct m3_cell*      cell )
+{
+    assert(match_result);
+    assert(cell);
+
+    const struct m3_cell**     matched_re = NULL;
+
+    if( match_result->matched_size < (match_result->matched_count + 1) * sizeof( struct m3_cell* ) )
+    {
+        matched_re = realloc( match_result->matched,
+                              match_result->matched_size + sizeof( struct m3_cell* ) );
+        assert( matched_re );
+        match_result->matched = matched_re;
+        match_result->matched_size += sizeof( struct m3_cell* );
+    }
+
+    match_result->matched[match_result->matched_count] = cell;
+    match_result->matched_count++;
+}
+
+void
+match_result_destroy( struct m3_match_result*    match_result )
+{
+    assert(match_result);
+    static const struct m3_match_result  match_result_const = M3_MATCH_RESULT_CONST;
+
+    if( match_result->matched != NULL )
+    {
+        free(match_result->matched);
+    }
+    *match_result = match_result_const;
+}
+
 // call once only per board
 void
-match( const struct m3_options  options,
-       const struct m3_cell*    cell,
-       const struct m3_cell**   matched )
+match( const struct m3_options    options,
+       const struct m3_cell*      cell,
+       struct m3_match_result*    match_result )
 {
     assert( cell );
-    assert( matched );
+    assert( match_result );
 
     struct m3_cell* neighbours[] = {
         cell->bottom,
@@ -26,9 +87,11 @@ match( const struct m3_options  options,
         return;
     }
 
-    match_cell( options, cell, matched );
+    match_result_init( match_result, cell);
 
-    if( *matched != NULL )
+    match_cell( options, cell, match_result );
+
+    if( match_result->matched_count >= options.matches_required_to_clear )
     {
         return;
     }
@@ -40,9 +103,9 @@ match( const struct m3_options  options,
         assert( neighbours[i] );
 
         // Recursively match
-        match( options, neighbours[i], matched );
+        match( options, neighbours[i], match_result );
 
-        if( *matched != NULL )
+        if( match_result->matched_count >= options.matches_required_to_clear )
         {
             return;
         }
@@ -53,11 +116,11 @@ match( const struct m3_options  options,
 void
 match_cell( const struct m3_options options,
             const struct m3_cell*   cell,
-            const struct m3_cell**  matched )
+            struct m3_match_result*    match_result )
 {
 
     assert( cell );
-    assert( matched );
+    assert( match_result );
 
     match_routine* routines[] = {
         cell->bottom_routine,
@@ -69,6 +132,8 @@ match_cell( const struct m3_options options,
         return;
     }
 
+    match_result_init( match_result, cell);
+
     for( int i = 0; i < sizeof( routines ) / sizeof( match_routine* ); i++ )
     {
         if( routines[i] == NULL )
@@ -77,9 +142,9 @@ match_cell( const struct m3_options options,
         }
 
         // Match algorythm ( down / right traversal )
-        routines[i]( options, cell, matched );
+        routines[i]( options, cell, match_result );
 
-        if( *matched != NULL )
+        if( match_result->matched_count >= options.matches_required_to_clear )
         {
             return;
         }
@@ -90,12 +155,12 @@ match_cell( const struct m3_options options,
 void
 match_vertical( const struct m3_options  options,
                 const struct m3_cell*    cell,
-                const struct m3_cell**   matched )
+                struct m3_match_result*    match_result )
 {
     assert( cell );
     assert( cell->top );    
     assert( cell->bottom );
-    assert( matched );
+    assert( match_result );
 
 
     uint8_t match_count = 1;
@@ -103,8 +168,15 @@ match_vertical( const struct m3_options  options,
     const struct m3_cell* cell_top = cell->top;
     const struct m3_cell* cell_bottom = cell->bottom;
 
+
+
+    match_result_init( match_result, cell);
+
     while( cell_current->category == cell_top->category )
     {
+
+        match_result_add_match( match_result, cell_top);
+
         match_count++;
         cell_current = cell_top;
         cell_top = cell_top->top;
@@ -114,6 +186,8 @@ match_vertical( const struct m3_options  options,
 
     while( cell_current->category == cell_bottom->category )
     {
+        match_result_add_match( match_result, cell_bottom);
+
         match_count++;
         cell_current = cell_bottom;
         cell_bottom = cell_bottom->bottom;
@@ -122,31 +196,40 @@ match_vertical( const struct m3_options  options,
 
     if( match_count >= options.matches_required_to_clear )
     {
-        print_neighbours( *cell );
+        
         printf("\nits bottom a match %02X %d\n", cell->category, match_count );
 
-        // TODO undo
-        *matched = cell;
+        for( uint8_t i = 0; i < match_result->matched_count; i++ )
+        {
+            print_neighbours( *match_result->matched[i] );
+        }
+
     }
 }
 
 void
 match_horizontal( const struct m3_options  options,
                   const struct m3_cell*    cell,
-                  const struct m3_cell**   matched )
-    {
+                  struct m3_match_result*    match_result )
+{
     assert( cell );
     assert( cell->right );
     assert( cell->left );
-    assert( matched );
+    assert( match_result );
 
     uint8_t match_count = 1;
     const struct m3_cell* cell_current = cell;
     const struct m3_cell* cell_right = cell->right;
     const struct m3_cell* cell_left = cell->left;
 
+    const struct m3_cell**     matched_re = NULL;
+
+    match_result_init( match_result, cell);
+
     while( cell_current->category == cell_right->category )
     {
+        match_result_add_match( match_result, cell_right);
+
         match_count++;
         cell_current = cell_right;
         cell_right = cell_current->right;
@@ -157,6 +240,8 @@ match_horizontal( const struct m3_options  options,
 
     while( cell_current->category == cell_left->category )
     {
+        match_result_add_match( match_result, cell_left);
+
         match_count++;
         cell_current = cell_left;
         cell_left = cell_current->left;
@@ -166,11 +251,12 @@ match_horizontal( const struct m3_options  options,
 
     if( match_count >= options.matches_required_to_clear )
     {
-        print_neighbours( *cell );
         printf("\nits right a match %02X %d\n", cell->category, match_count );
 
-        // TODO undo
-        *matched = cell;
+        for( uint8_t i = 0; i < match_result->matched_count; i++ )
+        {
+            print_neighbours( *match_result->matched[i] );
+        }
     }
 }
 
@@ -195,7 +281,7 @@ match_help( const struct m3_options options,
     const struct m3_cell* cell_left_most    = cell;
     const struct m3_cell* cell_current      = cell;
 
-    const struct m3_cell* matched   = NULL;
+    struct m3_match_result    match_result = M3_MATCH_RESULT_CONST;
 
     static swap_routine* swap_routines[] = {
         &swap_top,
@@ -211,21 +297,22 @@ match_help( const struct m3_options options,
             subject = (struct m3_cell*)cell_current;
             target  = NULL;
 
-            matched = NULL;
 
             swap_routines[i]( &subject, &target );
 
             if( subject != NULL && target != NULL )
             {
-                match( options, cell, &matched );
+                match( options, cell, &match_result );
 
                 // Always undo the swap
                 swap_routines[i]( &subject, &target );
 
-                if( matched != NULL )
+                if( match_result.matched_count >= options.matches_required_to_clear )
                 {
                     *swap_subject   = subject;
                     *swap_target    = target;
+
+                    match_result_destroy(&match_result);
                     return;
                 }
             }
@@ -241,5 +328,7 @@ match_help( const struct m3_options options,
             cell_current = cell_current->right;
         }
     }
+
+    match_result_destroy(&match_result);
 
 }

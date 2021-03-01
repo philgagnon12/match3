@@ -22,12 +22,6 @@ enum cell_masks {
     cell_mask_color_purple      = (1 << 4),
 };
 
-typedef void(match_routine)( const struct m3_options    options,
-                             const struct m3_cell*      self,
-                             const struct m3_cell**     matched );
-
-
-
 
 // TODO colors array should be part of options so i can add remove colors to increase, decrease diffculty
 struct m3_options {
@@ -41,6 +35,26 @@ struct m3_options {
 
 struct m3_cell;
 
+// TODO move into match.h
+// cant currently because of cyclic dependency with cell
+struct m3_match_result
+{
+    const struct m3_cell**     matched;
+    uint8_t matched_count;        // we keep count and size to prevent additionnal realloc
+    size_t matched_size;          // we keep count and size to prevent additionnal realloc
+};
+
+#define M3_MATCH_RESULT_CONST { \
+  NULL,\
+  0,\
+  0\
+}
+
+// TODO move into match.h
+// cant currently because of cyclic dependency with cell
+typedef void(match_routine)( const struct m3_options    options,
+                             const struct m3_cell*      self,
+                             struct m3_match_result*    matched_result );
 
 
 struct m3_cell {
@@ -64,3 +78,15 @@ struct m3_cell {
     NULL,   \
     NULL,   \
 }
+
+void
+print_cell( const struct m3_cell cell );
+
+void
+print_neighbours( const struct m3_cell cell );
+
+void
+print_board( const struct m3_cell cell );
+
+void
+print_board_info( const struct m3_cell cell );

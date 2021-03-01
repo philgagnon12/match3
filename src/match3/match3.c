@@ -424,25 +424,34 @@ main( int argc, char* argv[] )
 
     rand_board( &options, built_cell->top->left );
 
-    // Assigning first cell just because easy to do the loop that way
-    struct m3_cell* matched = built_cell;
+    
+
+
+    struct m3_match_result matched_result = M3_MATCH_RESULT_CONST;
+    // Assigning to options.matches_required_to_clear just because easy to do the loop that way
+    matched_result.matched_count = options.matches_required_to_clear;
+
+    struct m3_cell* matched_result_first_cell = built_cell;
 
     // Shuffling the board so that there is no automatic match
-    while( matched != NULL )
+    while( matched_result.matched_count >= options.matches_required_to_clear )
     {
-        unique_star_cell( &options, matched );
-        struct m3_cell* shuffled_cell = matched;
-        matched = NULL;
-
-        while( matched != NULL )
+        while( matched_result.matched_count >= options.matches_required_to_clear )
         {
-            match_cell( options, shuffled_cell, (const struct m3_cell**)&matched );
+            matched_result.matched_count = 1;
+            unique_star_cell( &options, matched_result_first_cell );
+            match_cell( options, matched_result_first_cell, &matched_result );
+            matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
         }
 
-        match( options, built_cell, (const struct m3_cell**)&matched );
+        match( options, built_cell, &matched_result );
+        matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
         print_board( *built_cell->top->left );
         printf("\n");
     }
+
+    // TODO match_result_destroy()
+    match_result_destroy(&matched_result);
 
     printf("shuffled\n");
 
@@ -457,7 +466,7 @@ main( int argc, char* argv[] )
     }
     else
     {
-        printf("Swap\n\n");
+        printf("\n\nSwap\n\n");
         print_neighbours( *swap_subject );
         printf("\n");
         printf("With\n\n");
