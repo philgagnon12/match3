@@ -87,19 +87,19 @@ main( int argc, char* argv[] )
 
     board_build(options, &built_cell );
 
-    board_rand( &options, built_cell->top->left );
+    board_rand( &options, built_cell);
 
     
-    board_shuffle( &options, built_cell );
+    board_shuffle( &options, built_cell->right->bottom );
 
-    print_board( *built_cell->top->left );
+    print_board( *built_cell );
     printf("\n");
     
 
     const struct m3_cell* swap_subject = NULL;
     const struct m3_cell* swap_target = NULL;
 
-    match_help( options, built_cell, &swap_subject, &swap_target );
+    match_help( options, built_cell->right->bottom, &swap_subject, &swap_target );
 
     if( swap_subject == NULL && swap_target == NULL )
     {
@@ -128,7 +128,7 @@ main( int argc, char* argv[] )
 
         match_clear( &options, &match_result );
 
-        print_board( *built_cell->top->left );
+        print_board( *built_cell );
         printf("\n");
 
         // slide / rotate the cleared cells
@@ -140,7 +140,7 @@ main( int argc, char* argv[] )
         }
         match_result_destroy( &match_result );
 
-        print_board( *built_cell->top->left );
+        print_board( *built_cell );
         printf("\n");
 
         // Below could be instead done at the same time as cell_pop_unshift  with
@@ -159,14 +159,14 @@ main( int argc, char* argv[] )
             cell_current = cell_current->next;
         }
 
-        print_board( *built_cell->top->left );
+        print_board( *built_cell);
         printf("\n");
     }
 
 
     printf("seed %d\n", seed );
 
-    board_destroy( built_cell->top->left );
+    board_destroy( built_cell );
     printf("done\n");
 
     return 0;

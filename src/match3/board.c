@@ -61,6 +61,13 @@ board_build( struct m3_options options,
             assert( cell_current );
             *cell_current = const_cell_wall_undefined;
 
+
+            // The output board is assigned to the first cell
+            if( *board == NULL )
+            {
+                *board = cell_current;
+            }
+
             cell_category = 0;
 
             // Left wall
@@ -92,12 +99,6 @@ board_build( struct m3_options options,
                 cell_category |= cell_mask_color | cell_mask_color_open;
                 cell_current->right_routine = &match_horizontal;
                 cell_current->bottom_routine = &match_vertical;
-
-                // The output cell is assigned to the first color cell
-                if( *board == NULL )
-                {
-                    *board = cell_current;
-                }
             }
 
             cell_current->category = cell_category;
@@ -201,30 +202,20 @@ board_destroy( struct m3_cell* board )
 {
     assert( board );
 
-    struct m3_cell* cell_left_most    = board;
-    struct m3_cell* cell_current      = board;
-    struct m3_cell* cell_free         = NULL;
+    struct m3_cell* cell_free      = board->next;
+    struct m3_cell* cell_next      = NULL;
 
-    while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    while( cell_free != NULL )
     {
-        cell_free = cell_current;
-
-        if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
-        {
-            cell_current = cell_left_most->bottom;
-            cell_left_most = cell_current;
-        }
-        else
-        {
-            cell_current = cell_current->right;
-        }
-
+        cell_next = cell_free->next;
         free( cell_free );
-    } // while
-
-
-    if( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
-    {
-        free( cell_current );
+        cell_free = cell_next;
     }
+
+    // destroy the 1 undefined wall that is re-used alot
+    assert( board->top);
+    assert( board->top->category == ( cell_mask_wall | cell_mask_wall_undefined ) );
+    free( board->top );
+
+    free( board );
 }
