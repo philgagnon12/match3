@@ -14,7 +14,7 @@ enum cell_masks {
     cell_mask_wall_left         = (1 << 3),
 
     cell_mask_color             = (1 << 6),
-    cell_mask_color_undefined   = (0 << 0),
+    cell_mask_color_open        = (0 << 0),
     cell_mask_color_red         = (1 << 0),
     cell_mask_color_green       = (1 << 1),
     cell_mask_color_blue        = (1 << 2),
@@ -80,6 +80,7 @@ struct m3_cell {
     NULL,   \
     NULL,   \
 }
+
 
 void
 print_cell( const struct m3_cell cell );

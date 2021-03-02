@@ -314,3 +314,22 @@ match_help( const struct m3_options options,
     match_result_destroy(&match_result);
 
 }
+
+void
+match_clear( const struct m3_options*   options,
+             struct m3_match_result*    match_result )
+{
+
+    assert( options );
+    assert( match_result );
+
+    if( match_result->matched_count < options->matches_required_to_clear )
+    {
+        return;
+    }
+
+    for( uint8_t i = 0; i < match_result->matched_count; i++ )
+    {
+        ((struct m3_cell*)match_result->matched[i])->category = cell_mask_color | cell_mask_color_open;
+    }
+}

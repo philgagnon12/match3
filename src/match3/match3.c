@@ -7,6 +7,7 @@
 
 #include <match3/cell.h>
 #include <match3/match.h>
+#include <match3/swap.h>
 
 // TODO i could keep count of the amount of colors chosen at random and keep it balanced, could avoid collisions ?
 
@@ -51,7 +52,7 @@ print_cell( const struct m3_cell cell )
             break;
 
         case ( cell_mask_color ):
-            printf("c");
+            printf("~");
             break;
 
             // TODO remove default
@@ -276,7 +277,7 @@ board_build( struct m3_options options,
                 r > 0 &&
                 r < ( rows - 1 ) )
             {
-                cell_category |= cell_mask_color | cell_mask_color_undefined;
+                cell_category |= cell_mask_color | cell_mask_color_open;
                 cell_current->right_routine = &match_horizontal;
                 cell_current->bottom_routine = &match_vertical;
 
@@ -422,6 +423,30 @@ board_shuffle( const struct m3_options*     options,
     printf("shuffled\n");
 }
 
+// Primary use is to give it a cleared cell, so that it can end up at the top
+void
+cell_pop_unshift( const struct m3_options*    options,
+                  struct m3_cell**      cell )
+{
+    assert( options );
+    assert( cell );
+    assert( *cell );
+
+
+    struct m3_cell* subject = NULL;
+    struct m3_cell* target = NULL;
+
+    subject = *cell;
+
+    while( subject != NULL )
+    {
+        *cell = subject;
+        swap_top( &subject, &target );
+        subject = target;
+    }
+}
+
+
 void
 usage(int argc, char* argv[])
 {
@@ -524,6 +549,53 @@ main( int argc, char* argv[] )
         printf("\n");
         printf("With\n\n");
         print_neighbours( *swap_target );
+        printf("\n");
+
+        // swap match and clear
+        swap( (struct m3_cell**)&swap_subject, (struct m3_cell**)&swap_target );
+
+        struct m3_match_result match_result = M3_MATCH_RESULT_CONST;
+
+        match_cell( options, swap_subject, &match_result );
+
+        if( match_result.matched_count < options.matches_required_to_clear )
+        {
+            match_cell( options, swap_target, &match_result );
+        }
+
+        match_clear( &options, &match_result );
+
+        print_board( *built_cell->top->left );
+        printf("\n");
+
+        // slide / rotate the cleared cells
+        for( uint8_t i = 0; i < match_result.matched_count; i++ )
+        {
+            struct m3_cell* cell_top_most = (struct m3_cell*)match_result.matched[i];
+            cell_pop_unshift( &options, &cell_top_most);
+
+        }
+
+        print_board( *built_cell->top->left );
+        printf("\n");
+
+        // Below could be instead done at the same time as cell_pop_unshift  with
+        // rand_cell( &options, cell_top_most);
+        // but i want print board
+
+        struct m3_cell* cell_current = built_cell;
+        while( cell_current != NULL )
+        {
+            if( ( cell_current->category | ( cell_mask_color | cell_mask_color_open ) ) == ( cell_mask_color | cell_mask_color_open ) )
+            {
+                // fill in new colors
+                rand_cell( &options, cell_current);
+            }
+            
+            cell_current = cell_current->next;
+        }
+
+        print_board( *built_cell->top->left );
         printf("\n");
     }
 

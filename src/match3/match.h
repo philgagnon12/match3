@@ -43,8 +43,13 @@ match_horizontal( const struct m3_options  options,
 // 1st arg is actually a board
 // swap_subject and swap_target will be NULL if there is no way to make a match
 // match help cannot detect horizontal or vertical matches since the match starts at the cell
+// TODO match_help should also set the cell that will match after the swap is done kind of ? const struct m3_cell** swap_match
 void
 match_help( const struct m3_options options,
             struct m3_cell*         cell,
             const struct m3_cell**  swap_subject,
             const struct m3_cell**  swap_target );
+
+void
+match_clear( const struct m3_options*   options,
+             struct m3_match_result*    match_result );
