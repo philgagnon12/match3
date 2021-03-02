@@ -8,13 +8,14 @@
 
 
 void
-board_build( struct m3_options options,
-             struct m3_cell**   board )
+board_build( const struct m3_options*   options,
+             struct m3_cell**           board )
 {
+    assert( options );
     assert( board );
 
-    uint8_t columns = options.columns;
-    uint8_t rows = options.rows;
+    uint8_t columns = options->columns;
+    uint8_t rows = options->rows;
 
     assert( columns > 0 );
     assert( rows > 0 );
@@ -34,7 +35,7 @@ board_build( struct m3_options options,
     struct m3_cell* cell_previous   = NULL;
 
 
-    srand( options.seed );  
+    srand( options->seed );
 
     cell_wall_undefined = malloc( sizeof( struct m3_cell ) );
     assert( cell_wall_undefined );
@@ -162,8 +163,8 @@ board_rand( const struct m3_options*    options,
 }
 
 void
-board_shuffle( const struct m3_options*     options,
-               struct m3_cell*              board )
+board_shuffle( const struct m3_options* options,
+               struct m3_cell*          board )
 {
     assert( options );
     assert( board );
@@ -181,11 +182,11 @@ board_shuffle( const struct m3_options*     options,
         {
             matched_result.matched_count = 1;
             cell_rand( options, matched_result_first_cell );
-            match_cell( *options, matched_result_first_cell, &matched_result );
+            match_cell( options, matched_result_first_cell, &matched_result );
             matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
         }
 
-        match( *options, matched_result_first_cell, &matched_result );
+        match( options, matched_result_first_cell, &matched_result );
         matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
         //print_board( *board->top->left );
         //printf("\n");

@@ -7,8 +7,8 @@
 #include "match3/swap.h"
 
 void
-cell_rand( const struct m3_options*     options,
-           struct m3_cell*              cell )
+cell_rand( const struct m3_options* options,
+           struct m3_cell*          cell )
 {
     assert( options );
     assert( cell );
@@ -34,8 +34,8 @@ cell_rand( const struct m3_options*     options,
 
 // Primary use is to give it a cleared cell, so that it can end up at the top
 void
-cell_pop_unshift( const struct m3_options*    options,
-                  struct m3_cell**      cell )
+cell_pop_unshift( const struct m3_options* options,
+                  struct m3_cell**         cell )
 {
     assert( options );
     assert( cell );
@@ -58,15 +58,15 @@ cell_pop_unshift( const struct m3_options*    options,
 
 
 int
-unique_star_cell_compar( const void* a, const void* b)
+cell_star_unique_compar( const void* a, const void* b)
 {
     int rand_int = rand();
     return rand_int;
 }
 
 void
-unique_star_cell( const struct m3_options*  options,
-                  struct m3_cell*           cell )
+cell_star_unique( const struct m3_options* options,
+                  struct m3_cell*          cell )
 {
     assert( options );
     assert( cell );
@@ -83,7 +83,7 @@ unique_star_cell( const struct m3_options*  options,
     qsort( options->colors,
            options->colors_size / sizeof( enum cell_masks ),
            sizeof( enum cell_masks ),
-           &unique_star_cell_compar );
+           &cell_star_unique_compar );
 
     uint8_t const_colors_count = options->colors_size / sizeof( enum cell_masks );
     uint8_t colors_count = const_colors_count;

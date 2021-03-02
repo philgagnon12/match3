@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "match3/match3.h"
 #include "match3/cell.h"
 
 typedef void(swap_routine)( struct m3_cell**   subject,

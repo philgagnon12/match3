@@ -5,6 +5,7 @@
 #include <time.h>
 #include <string.h>
 
+#include <match3/match3.h>
 #include <match3/cell.h>
 #include <match3/match.h>
 #include <match3/swap.h>
@@ -74,32 +75,33 @@ main( int argc, char* argv[] )
         cell_mask_color_purple
     };
 
-    const struct m3_options options = {
-        seed,
-        columns, // columns
-        rows, // rows
-        3,
-        colors,
-        sizeof( colors )
-    };
+    struct m3_options options = M3_OPTIONS_CONST;
 
-    struct m3_cell* built_cell = NULL;
+    options.seed                        = seed;
+    options.columns                     = columns;
+    options.rows                        = rows;
+    options.matches_required_to_clear   = 3;
+    options.colors                      = colors;
+    options.colors_size                 = sizeof( colors );
 
-    board_build(options, &built_cell );
 
-    board_rand( &options, built_cell);
+    struct m3_cell* board = NULL;
 
-    
-    board_shuffle( &options, built_cell->right->bottom );
+    board_build( &options, &board );
 
-    print_board( *built_cell );
+    board_rand( &options, board);
+
+
+    board_shuffle( &options, board->right->bottom );
+
+    print_board( *board );
     printf("\n");
-    
+
 
     const struct m3_cell* swap_subject = NULL;
     const struct m3_cell* swap_target = NULL;
 
-    match_help( options, built_cell->right->bottom, &swap_subject, &swap_target );
+    match_help( &options, board->right->bottom, &swap_subject, &swap_target );
 
     if( swap_subject == NULL && swap_target == NULL )
     {
@@ -119,16 +121,16 @@ main( int argc, char* argv[] )
 
         struct m3_match_result match_result = M3_MATCH_RESULT_CONST;
 
-        match_cell( options, swap_subject, &match_result );
+        match_cell( &options, swap_subject, &match_result );
 
         if( match_result.matched_count < options.matches_required_to_clear )
         {
-            match_cell( options, swap_target, &match_result );
+            match_cell( &options, swap_target, &match_result );
         }
 
         match_clear( &options, &match_result );
 
-        print_board( *built_cell );
+        print_board( *board );
         printf("\n");
 
         // slide / rotate the cleared cells
@@ -140,14 +142,14 @@ main( int argc, char* argv[] )
         }
         match_result_destroy( &match_result );
 
-        print_board( *built_cell );
+        print_board( *board );
         printf("\n");
 
         // Below could be instead done at the same time as cell_pop_unshift  with
         // rand_cell( &options, cell_top_most);
         // but i want print board
 
-        struct m3_cell* cell_current = built_cell;
+        struct m3_cell* cell_current = board;
         while( cell_current != NULL )
         {
             if( ( cell_current->category | ( cell_mask_color | cell_mask_color_open ) ) == ( cell_mask_color | cell_mask_color_open ) )
@@ -155,18 +157,18 @@ main( int argc, char* argv[] )
                 // fill in new colors
                 cell_rand( &options, cell_current);
             }
-            
+
             cell_current = cell_current->next;
         }
 
-        print_board( *built_cell);
+        print_board( *board);
         printf("\n");
     }
 
 
     printf("seed %d\n", seed );
 
-    board_destroy( built_cell );
+    board_destroy( board );
     printf("done\n");
 
     return 0;
