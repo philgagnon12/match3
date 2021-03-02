@@ -21,6 +21,26 @@ typedef void(match_routine)( const struct m3_options* options,
                              struct m3_match_result*  matched_result );
 
 
+///
+// After you get a match_help_result from match_help() that evaluates to true from
+// match_help_has_swapped_and_matched( match_help_result )
+// Then you can
+// 1. swap( swap_subject, swap_target )
+// 2. match_cell( options, swap_match, &match_result )
+// You will obtain a match_result that can be used on match_clear()
+struct m3_match_help_result
+{
+    const struct m3_cell*   swap_subject;
+    const struct m3_cell*   swap_target;
+    const struct m3_cell*   swap_match;
+};
+
+#define M3_MATCH_HELP_RESULT_CONST { \
+    NULL,   \
+    NULL,   \
+    NULL,   \
+}
+
 // Will allocate memory for matched
 // and reset the array and count
 void
@@ -57,16 +77,20 @@ match_horizontal( const struct m3_options* options,
                   const struct m3_cell*    cell,
                   struct m3_match_result*  match_result );
 
-// TODO could be a match_help_best for the
-// 1st arg is actually a board
-// swap_subject and swap_target will be NULL if there is no way to make a match
-// match help cannot detect horizontal or vertical matches since the match starts at the cell
-// TODO match_help should also set the cell that will match after the swap is done kind of ? const struct m3_cell** swap_match
+
+///
+// After you get a match_help_result from match_help() that evaluates to true from
+// match_help_has_swapped_and_matched( match_help_result )
+// Then you can
+// 1. swap( swap_subject, swap_target )
+// 2. match_cell( options, swap_match, &match_result )
+// You will obtain a match_result that can be used on match_clear()
 void
-match_help( const struct m3_options* options,
-            struct m3_cell*          cell,
-            const struct m3_cell**   swap_subject,
-            const struct m3_cell**   swap_target );
+match_help( const struct m3_options*      options,
+            struct m3_cell*               board,
+            struct m3_match_help_result*  match_help_result );
+int
+match_help_has_swapped_and_matched( struct m3_match_help_result match_help_result );
 
 void
 match_clear( const struct m3_options* options,

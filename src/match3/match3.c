@@ -97,36 +97,32 @@ main( int argc, char* argv[] )
     print_board( *board );
     printf("\n");
 
+    struct m3_match_help_result match_help_result = M3_MATCH_HELP_RESULT_CONST;
 
-    const struct m3_cell* swap_subject = NULL;
-    const struct m3_cell* swap_target = NULL;
 
-    match_help( &options, board->right->bottom, &swap_subject, &swap_target );
+    match_help( &options,
+                board->right->bottom,
+                &match_help_result );
 
-    if( swap_subject == NULL && swap_target == NULL )
+    if( !match_help_has_swapped_and_matched( match_help_result ) )
     {
         printf("No way to end the game\n");
     }
     else
     {
         printf("\n\nSwap\n\n");
-        print_neighbours( *swap_subject );
+        print_neighbours( *match_help_result.swap_subject );
         printf("\n");
         printf("With\n\n");
-        print_neighbours( *swap_target );
+        print_neighbours( *match_help_result.swap_target );
         printf("\n");
 
         // swap match and clear
-        swap( (struct m3_cell**)&swap_subject, (struct m3_cell**)&swap_target );
+        swap( (struct m3_cell**)&match_help_result.swap_subject, (struct m3_cell**)&match_help_result.swap_target );
 
         struct m3_match_result match_result = M3_MATCH_RESULT_CONST;
 
-        match_cell( &options, swap_subject, &match_result );
-
-        if( match_result.matched_count < options.matches_required_to_clear )
-        {
-            match_cell( &options, swap_target, &match_result );
-        }
+        match_cell( &options, match_help_result.swap_match, &match_result );
 
         match_clear( &options, &match_result );
 

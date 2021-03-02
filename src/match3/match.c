@@ -246,26 +246,27 @@ match_horizontal( const struct m3_options* options,
 }
 
 
-// TODO could be a match_help_best for the
-// 1st arg is actually a board
-// swap_subject and swap_target will be NULL if there is no way to make a match
-// match help cannot detect horizontal or vertical matches since the match starts at the cell
+///
+// After you get a match_help_result from match_help() that evaluates to true from
+// match_help_has_swapped_and_matched( match_help_result )
+// Then you can
+// 1. swap( swap_subject, swap_target )
+// 2. match_cell( options, swap_match, &match_result )
+// You will obtain a match_result that can be used on match_clear()
 void
-match_help( const struct m3_options* options,
-            struct m3_cell*          cell,
-            const struct m3_cell**   swap_subject,
-            const struct m3_cell**   swap_target )
+match_help( const struct m3_options*      options,
+            struct m3_cell*               board,
+            struct m3_match_help_result*  match_help_result )
 {
     assert( options );
-    assert( swap_subject );
-    assert( swap_target );
+    assert( board );
+    assert( match_help_result );
 
+    static const struct m3_match_help_result match_help_result_const = M3_MATCH_HELP_RESULT_CONST;
 
-    struct m3_cell* subject  = NULL;
-    struct m3_cell* target   = NULL;
-
-    const struct m3_cell* cell_left_most    = cell;
-    const struct m3_cell* cell_current      = cell;
+    struct m3_cell* cell_current    = board;
+    struct m3_cell* subject         = NULL;
+    struct m3_cell* target          = NULL;
 
     struct m3_match_result    match_result = M3_MATCH_RESULT_CONST;
 
@@ -276,47 +277,66 @@ match_help( const struct m3_options* options,
         &swap_left
     };
 
-    while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    struct m3_cell** subject_and_target[] = {
+        &subject,
+        &target
+    };
+
+    // Reset
+    *match_help_result = match_help_result_const;
+
+    while( cell_current != NULL )
     {
-        for( uint8_t i = 0; i < sizeof( swap_routines ) / sizeof( swap_routine* ); i++ )
+        if( ( cell_current->category & cell_mask_wall ) != cell_mask_wall )
         {
-            subject = (struct m3_cell*)cell_current;
-            target  = NULL;
-
-
-            swap_routines[i]( &subject, &target );
-
-            if( subject != NULL && target != NULL )
+            for( uint8_t i = 0; i < sizeof( swap_routines ) / sizeof( swap_routine* ); i++ )
             {
-                match( options, cell, &match_result );
+                subject = (struct m3_cell*)cell_current;
+                target  = NULL;
 
-                // Always undo the swap
                 swap_routines[i]( &subject, &target );
 
-                if( match_result.matched_count >= options->matches_required_to_clear )
+                if( subject != NULL && target != NULL )
                 {
-                    *swap_subject   = subject;
-                    *swap_target    = target;
+                    for( uint8_t j = 0; match_help_result->swap_match == NULL && j < sizeof( subject_and_target ) / sizeof( struct m3_cell**); j++ )
+                    {
+                        match_cell( options, *subject_and_target[j], &match_result );
 
-                    match_result_destroy(&match_result);
-                    return;
+                        if( match_result.matched_count >= options->matches_required_to_clear )
+                        {
+                            match_help_result->swap_match = match_result.matched[0];
+                            break;
+                        }
+                    }
+
+                    swap_routines[i]( &subject, &target );
+
+                    if( match_help_result->swap_match != NULL )
+                    {
+                        match_help_result->swap_subject   = subject;
+                        match_help_result->swap_target    = target;
+
+                        match_result_destroy(&match_result);
+                        return;
+                    }
+
                 }
             }
         }
 
-        if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
-        {
-            cell_current = cell_left_most->bottom;
-            cell_left_most = cell_current;
-        }
-        else
-        {
-            cell_current = cell_current->right;
-        }
-    }
+        cell_current = cell_current->next;
+    } // while
 
     match_result_destroy(&match_result);
 
+}
+
+int
+match_help_has_swapped_and_matched( struct m3_match_help_result match_help_result )
+{
+    return ( match_help_result.swap_subject != NULL && 
+             match_help_result.swap_target  != NULL &&
+             match_help_result.swap_match   != NULL );
 }
 
 void
