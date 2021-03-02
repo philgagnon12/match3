@@ -24,6 +24,13 @@ usage(int argc, char* argv[])
 }
 
 // TODO find a way that seeds would work post shuffle, so that when you put in a seed it wouldnt have to shuffle the board
+
+// bug with seed 1614718141 [ solved ]
+// the r color is not falling at the bottom of board because we start pop_unshift from the bottom [ solved ]
+
+// TODO bug with seed 1614722909
+
+// TODO bug with seed 1614725437 10 10 the fallthrough is incorrect
 int
 main( int argc, char* argv[] )
 {
@@ -132,9 +139,21 @@ main( int argc, char* argv[] )
         // slide / rotate the cleared cells
         for( uint8_t i = 0; i < match_result.matched_count; i++ )
         {
-            struct m3_cell* cell_top_most = (struct m3_cell*)match_result.matched[i];
-            cell_pop_unshift( &options, &cell_top_most);
+            const struct m3_cell* cell_first_top_color = NULL;
 
+            cell_find_first_top_color( (struct m3_cell*)match_result.matched[i], &cell_first_top_color );
+
+            struct m3_cell* cell_to_fallthrough = (struct m3_cell*)cell_first_top_color;
+
+            while( cell_to_fallthrough != NULL )
+            {
+                cell_fallthrough( &options, &cell_to_fallthrough );
+
+                cell_find_first_top_color( cell_to_fallthrough, &cell_first_top_color );
+
+
+                cell_to_fallthrough = (struct m3_cell*)cell_first_top_color;
+            }
         }
         match_result_destroy( &match_result );
 

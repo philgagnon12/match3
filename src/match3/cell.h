@@ -38,7 +38,12 @@ cell_rand( const struct m3_options* options,
            struct m3_cell*          cell );
 
 void
-cell_pop_unshift( const struct m3_options* options,
+cell_find_first_top_color( const struct m3_cell*    board,
+                           const struct m3_cell**   cell_first_top_color );
+
+// a color cell can fall through color-open cell
+void
+cell_fallthrough( const struct m3_options* options,
                   struct m3_cell**         cell );
 
 void

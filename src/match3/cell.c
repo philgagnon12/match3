@@ -31,10 +31,30 @@ cell_rand( const struct m3_options* options,
     }
 }
 
-
-// Primary use is to give it a cleared cell, so that it can end up at the top
 void
-cell_pop_unshift( const struct m3_options* options,
+cell_find_first_top_color( const struct m3_cell*    board,
+                           const struct m3_cell**   cell_first_top_color )
+{
+
+    assert(board);
+    assert(cell_first_top_color);
+
+    const struct m3_cell* first_top_color = board->top;
+
+    // Reset
+    *cell_first_top_color = NULL;
+
+    while( ( first_top_color->category & cell_mask_wall ) != cell_mask_wall &&
+           first_top_color->category != ( cell_mask_color | cell_mask_color_open ) )
+    {
+        *cell_first_top_color = first_top_color;
+        first_top_color = first_top_color->top;
+    }
+}
+
+// a color cell can fall through color-open cell
+void
+cell_fallthrough( const struct m3_options* options,
                   struct m3_cell**         cell )
 {
     assert( options );
@@ -50,12 +70,19 @@ cell_pop_unshift( const struct m3_options* options,
     while( subject != NULL )
     {
         *cell = subject;
-        swap_top( &subject, &target );
-        subject = target;
+        assert( subject->bottom );
+        if( (subject->bottom->category & (cell_mask_color | cell_mask_color_open )) == (cell_mask_color | cell_mask_color_open ))
+        {
+            swap_bottom( &subject, &target );
+            subject = target;            
+        }
+        else
+        {
+            subject = NULL;
+        }
     }
+
 }
-
-
 
 int
 cell_star_unique_compar( const void* a, const void* b)
