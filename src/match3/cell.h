@@ -83,13 +83,13 @@ struct m3_cell {
 
 
 void
-print_cell( const struct m3_cell cell );
+cell_rand( const struct m3_options*     options,
+           struct m3_cell*              cell );
 
 void
-print_neighbours( const struct m3_cell cell );
+cell_pop_unshift( const struct m3_options*    options,
+                  struct m3_cell**      cell );
 
 void
-print_board( const struct m3_cell cell );
-
-void
-print_board_info( const struct m3_cell cell );
+unique_star_cell( const struct m3_options*  options,
+                  struct m3_cell*           cell );
