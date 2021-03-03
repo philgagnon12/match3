@@ -45,9 +45,14 @@ cell_find_first_top_color( const struct m3_cell*    board,
     *cell_first_top_color = NULL;
 
     while( ( first_top_color->category & cell_mask_wall ) != cell_mask_wall &&
-           first_top_color->category != ( cell_mask_color | cell_mask_color_open ) )
+            *cell_first_top_color == NULL )
     {
-        *cell_first_top_color = first_top_color;
+
+        if( first_top_color->category != ( cell_mask_color | cell_mask_color_open ) )
+        {
+            *cell_first_top_color = first_top_color;
+        }
+
         first_top_color = first_top_color->top;
     }
 }
@@ -71,10 +76,11 @@ cell_fallthrough( const struct m3_options* options,
     {
         *cell = subject;
         assert( subject->bottom );
-        if( (subject->bottom->category & (cell_mask_color | cell_mask_color_open )) == (cell_mask_color | cell_mask_color_open ))
+
+        if( subject->bottom->category == (cell_mask_color | cell_mask_color_open ))
         {
             swap_bottom( &subject, &target );
-            subject = target;            
+            subject = target;
         }
         else
         {
