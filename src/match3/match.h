@@ -95,3 +95,7 @@ match_help_has_swapped_and_matched( struct m3_match_help_result match_help_resul
 void
 match_clear( const struct m3_options* options,
              struct m3_match_result*  match_result );
+
+void
+match_clear_sort( const struct m3_options*  options,
+                  struct m3_match_result*   match_result );

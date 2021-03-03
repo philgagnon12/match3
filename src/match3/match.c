@@ -357,3 +357,32 @@ match_clear( const struct m3_options* options,
         ((struct m3_cell*)match_result->matched[i])->category = cell_mask_color | cell_mask_color_open;
     }
 }
+
+void
+match_clear_sort( const struct m3_options*  options,
+                  struct m3_match_result*   match_result )
+{
+    assert( options );
+    assert( match_result );
+
+    const struct m3_cell* cell_first_top_color = NULL;
+
+    struct m3_cell* cell_to_fallthrough = NULL;
+
+    // slide / rotate the cleared cells
+    for( uint8_t i = 0; i < match_result->matched_count; i++ )
+    {
+        cell_find_first_top_color( (struct m3_cell*)match_result->matched[i], &cell_first_top_color );
+
+        cell_to_fallthrough = (struct m3_cell*)cell_first_top_color;
+
+        while( cell_to_fallthrough != NULL )
+        {
+            cell_fallthrough( options, &cell_to_fallthrough );
+
+            cell_find_first_top_color( cell_to_fallthrough, &cell_first_top_color );
+
+            cell_to_fallthrough = (struct m3_cell*)cell_first_top_color;
+        }
+    }
+}

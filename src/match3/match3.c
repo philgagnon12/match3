@@ -126,47 +126,18 @@ main( int argc, char* argv[] )
 
         match_clear( &options, &match_result );
 
+
         print_board( *board );
         printf("\n");
 
-        // slide / rotate the cleared cells
-        for( uint8_t i = 0; i < match_result.matched_count; i++ )
-        {
-            const struct m3_cell* cell_first_top_color = NULL;
+        match_clear_sort( &options, &match_result );
 
-            cell_find_first_top_color( (struct m3_cell*)match_result.matched[i], &cell_first_top_color );
-
-            struct m3_cell* cell_to_fallthrough = (struct m3_cell*)cell_first_top_color;
-
-            while( cell_to_fallthrough != NULL )
-            {
-                cell_fallthrough( &options, &cell_to_fallthrough );
-
-                cell_find_first_top_color( cell_to_fallthrough, &cell_first_top_color );
-
-                cell_to_fallthrough = (struct m3_cell*)cell_first_top_color;
-            }
-        }
         match_result_destroy( &match_result );
 
         print_board( *board );
         printf("\n");
 
-        // Below could be instead done at the same time as cell_pop_unshift  with
-        // rand_cell( &options, cell_top_most);
-        // but i want print board
-
-        struct m3_cell* cell_current = board;
-        while( cell_current != NULL )
-        {
-            if( ( cell_current->category | ( cell_mask_color | cell_mask_color_open ) ) == ( cell_mask_color | cell_mask_color_open ) )
-            {
-                // fill in new colors
-                cell_rand( &options, cell_current);
-            }
-
-            cell_current = cell_current->next;
-        }
+        board_rand( &options, board );
 
         print_board( *board);
         printf("\n");

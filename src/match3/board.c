@@ -153,7 +153,7 @@ board_rand( const struct m3_options*    options,
 
     while( cell_current != NULL )
     {
-        if( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+        if( cell_current->category == ( cell_mask_color | cell_mask_color_open ) )
         {
             cell_rand( options, cell_current );
         }
