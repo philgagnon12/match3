@@ -41,6 +41,10 @@ struct m3_match_help_result
     NULL,   \
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Will allocate memory for matched
 // and reset the array and count
 void
@@ -99,3 +103,7 @@ match_clear( const struct m3_options* options,
 void
 match_clear_sort( const struct m3_options*  options,
                   struct m3_match_result*   match_result );
+
+#ifdef __cplusplus
+}
+#endif

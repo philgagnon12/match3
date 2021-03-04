@@ -32,6 +32,9 @@ struct m3_cell {
     NULL,   \
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 cell_rand( const struct m3_options* options,
@@ -49,3 +52,7 @@ cell_fallthrough( const struct m3_options* options,
 void
 cell_star_unique( const struct m3_options* options,
                   struct m3_cell*          cell );
+
+#ifdef __cplusplus
+}
+#endif
