@@ -67,12 +67,12 @@ main( int argc, char* argv[] )
     printf("columns %d\n", columns );
     printf("rows %d\n", rows );
 
-    enum cell_masks colors[] = {
-        cell_mask_color_red,
-        cell_mask_color_green,
-        cell_mask_color_blue,
-        cell_mask_color_yellow,
-        cell_mask_color_purple
+    uint8_t colors[] = {
+        m3_cell_color_red,
+        m3_cell_color_green,
+        m3_cell_color_blue,
+        m3_cell_color_yellow,
+        m3_cell_color_purple
     };
 
     struct m3_options options = M3_OPTIONS_CONST;

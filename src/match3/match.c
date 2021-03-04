@@ -83,7 +83,7 @@ match( const struct m3_options* options,
 
     while( cell_current != NULL )
     {
-        if( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+        if( ( cell_current->category | ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) ) != ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) )
         {
             match_cell( options, cell_current, match_result );
 
@@ -112,7 +112,7 @@ match_cell( const struct m3_options* options,
         cell->right_routine
     };
 
-    if( ( cell->category & cell_mask_wall ) == cell_mask_wall )
+    if( ( cell->category & m3_cell_flag_wall ) == m3_cell_flag_wall )
     {
         return;
     }
@@ -287,7 +287,7 @@ match_help( const struct m3_options*      options,
 
     while( cell_current != NULL )
     {
-        if( ( cell_current->category & cell_mask_wall ) != cell_mask_wall )
+        if( ( cell_current->category & m3_cell_flag_wall ) != m3_cell_flag_wall )
         {
             for( uint8_t i = 0; i < sizeof( swap_routines ) / sizeof( swap_routine* ); i++ )
             {
@@ -354,7 +354,7 @@ match_clear( const struct m3_options* options,
 
     for( uint8_t i = 0; i < match_result->matched_count; i++ )
     {
-        ((struct m3_cell*)match_result->matched[i])->category = cell_mask_color | cell_mask_color_open;
+        ((struct m3_cell*)match_result->matched[i])->category = m3_cell_flag_color | m3_cell_flag_color_open;
     }
 }
 

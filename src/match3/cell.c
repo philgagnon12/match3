@@ -14,18 +14,18 @@ cell_rand( const struct m3_options* options,
     assert( cell );
 
     int rand_color = 0;
-    double color_range = RAND_MAX / ( options->colors_size / sizeof( enum cell_masks ) );
+    double color_range = RAND_MAX / ( options->colors_size / sizeof( uint8_t ) );
 
-
-    if( ( cell->category & cell_mask_color ) == cell_mask_color )
+    if( ( cell->category & m3_cell_flag_color ) == m3_cell_flag_color )
     {
         rand_color = rand();
 
-        for( uint8_t c = 0; c < options->colors_size / sizeof( enum cell_masks ); c++ )
+        for( uint8_t c = 0; c < options->colors_size / sizeof( uint8_t ); c++ )
         {
             if( rand_color >= color_range * c && rand_color < ( color_range * (c+1) ) )
             {
-                cell->category = ( cell_mask_color | options->colors[c] );
+                assert( options->colors[c] < m3_cell_mask_color );
+                cell->category = options->colors[c];
             }
         }
     }
@@ -44,11 +44,11 @@ cell_find_first_top_color( const struct m3_cell*    board,
     // Reset
     *cell_first_top_color = NULL;
 
-    while( ( first_top_color->category & cell_mask_wall ) != cell_mask_wall &&
+    while( ( first_top_color->category & m3_cell_flag_wall ) != m3_cell_flag_wall &&
             *cell_first_top_color == NULL )
     {
 
-        if( first_top_color->category != ( cell_mask_color | cell_mask_color_open ) )
+        if( first_top_color->category != ( m3_cell_flag_color | m3_cell_flag_color_open ) )
         {
             *cell_first_top_color = first_top_color;
         }
@@ -77,7 +77,7 @@ cell_fallthrough( const struct m3_options* options,
         *cell = subject;
         assert( subject->bottom );
 
-        if( subject->bottom->category == (cell_mask_color | cell_mask_color_open ))
+        if( subject->bottom->category == (m3_cell_flag_color | m3_cell_flag_color_open ))
         {
             swap_bottom( &subject, &target );
             subject = target;
@@ -114,18 +114,18 @@ cell_star_unique( const struct m3_options* options,
     };
 
     qsort( options->colors,
-           options->colors_size / sizeof( enum cell_masks ),
-           sizeof( enum cell_masks ),
+           options->colors_size / sizeof( uint8_t ),
+           sizeof( uint8_t ),
            &cell_star_unique_compar );
 
-    uint8_t const_colors_count = options->colors_size / sizeof( enum cell_masks );
+    uint8_t const_colors_count = options->colors_size / sizeof( uint8_t );
     uint8_t colors_count = const_colors_count;
 
     for( uint8_t i = 0; i < sizeof( cells ) / sizeof( struct m3_cells* ); i++ )
     {
-        if( ( cells[i]->category & cell_mask_color ) == cell_mask_color )
+        if( ( cells[i]->category & m3_cell_flag_color ) == m3_cell_flag_color )
         {
-            cells[i]->category = cell_mask_color | options->colors[--colors_count];
+            cells[i]->category = options->colors[--colors_count];
 
 
             if( colors_count == 0 )

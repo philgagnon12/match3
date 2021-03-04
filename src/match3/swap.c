@@ -26,7 +26,7 @@ swap( struct m3_cell**   subject,
 
     uint8_t category_subject = cell_subject->category;
 
-    if( ( cell_subject->category & cell_mask_color ) == ( cell_target->category & cell_mask_color ) )
+    if( ( cell_subject->category & m3_cell_flag_color ) == ( cell_target->category & m3_cell_flag_color ) )
     {
             cell_subject->category = cell_target->category;
             cell_target->category  = category_subject;

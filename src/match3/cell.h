@@ -22,7 +22,7 @@ struct m3_cell {
 };
 
 #define M3_CELL_CONST { \
-    cell_mask_wall | cell_mask_wall_undefined,   \
+    m3_cell_flag_wall | m3_cell_flag_wall_undefined,   \
     NULL,   \
     NULL,   \
     NULL,   \

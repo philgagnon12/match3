@@ -10,42 +10,42 @@ print_cell( const struct m3_cell cell )
 {
     switch( cell.category )
     {
-        case ( cell_mask_wall | cell_mask_wall_top | cell_mask_wall_right ):
-        case ( cell_mask_wall | cell_mask_wall_top | cell_mask_wall_left ):
-        case ( cell_mask_wall | cell_mask_wall_bottom | cell_mask_wall_right ):
-        case ( cell_mask_wall | cell_mask_wall_bottom | cell_mask_wall_left ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_top | m3_cell_flag_wall_right ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_top | m3_cell_flag_wall_left ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_bottom | m3_cell_flag_wall_right ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_bottom | m3_cell_flag_wall_left ):
             printf("x");
             break;
-        case ( cell_mask_wall | cell_mask_wall_top ):
-        case ( cell_mask_wall | cell_mask_wall_bottom ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_top ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_bottom ):
             printf("-");
             break;
-        case ( cell_mask_wall | cell_mask_wall_right ):
-        case ( cell_mask_wall | cell_mask_wall_left ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_right ):
+        case ( m3_cell_flag_wall | m3_cell_flag_wall_left ):
             printf("|");
             break;
 
-        case ( cell_mask_color | cell_mask_color_red ):
+        case m3_cell_color_red:
             printf("r");
             break;
 
-        case ( cell_mask_color | cell_mask_color_green ):
+        case m3_cell_color_green:
             printf("g");
             break;
 
-        case ( cell_mask_color | cell_mask_color_blue ):
+        case m3_cell_color_blue:
             printf("b");
             break;
 
-        case ( cell_mask_color | cell_mask_color_yellow ):
+        case m3_cell_color_yellow:
             printf("y");
             break;
 
-        case ( cell_mask_color | cell_mask_color_purple ):
+        case m3_cell_color_purple:
             printf("p");
             break;
 
-        case ( cell_mask_color ):
+        case ( m3_cell_flag_color ):
             printf("~");
             break;
 
@@ -77,12 +77,12 @@ print_board( const struct m3_cell cell )
     const struct m3_cell* cell_current      = &cell;
 
 
-    while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    while( ( cell_current->category | ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) ) != ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) )
     {
 
         print_cell( *cell_current );
 
-        if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
+        if( ( cell_current->category & ( m3_cell_flag_wall | m3_cell_flag_wall_right ) ) == ( m3_cell_flag_wall | m3_cell_flag_wall_right ) )
         {
             printf("\n");
             cell_current = cell_left_most->bottom;
@@ -103,13 +103,13 @@ print_board_info( const struct m3_cell cell )
     const struct m3_cell* cell_current      = &cell;
 
 
-    while( ( cell_current->category | ( cell_mask_wall | cell_mask_wall_undefined ) ) != ( cell_mask_wall | cell_mask_wall_undefined ) )
+    while( ( cell_current->category | ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) ) != ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) )
     {
 
         print_neighbours( *cell_current );
         printf("\n");
 
-        if( ( cell_current->category & ( cell_mask_wall | cell_mask_wall_right ) ) == ( cell_mask_wall | cell_mask_wall_right ) )
+        if( ( cell_current->category & ( m3_cell_flag_wall | m3_cell_flag_wall_right ) ) == ( m3_cell_flag_wall | m3_cell_flag_wall_right ) )
         {
             cell_current = cell_left_most->bottom;
             cell_left_most = cell_current;

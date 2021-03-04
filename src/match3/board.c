@@ -74,22 +74,22 @@ board_build( const struct m3_options*   options,
             // Left wall
             if( c == 0 )
             {
-                cell_category |= cell_mask_wall | cell_mask_wall_left;
+                cell_category |= m3_cell_flag_wall | m3_cell_flag_wall_left;
             }
 
             if( c == columns - 1 )
             {
-                cell_category |= cell_mask_wall | cell_mask_wall_right;
+                cell_category |= m3_cell_flag_wall | m3_cell_flag_wall_right;
             }
 
             if( r == 0 )
             {
-                cell_category |= cell_mask_wall | cell_mask_wall_top;
+                cell_category |= m3_cell_flag_wall | m3_cell_flag_wall_top;
             }
 
             if( r == rows - 1 )
             {
-                cell_category |= cell_mask_wall | cell_mask_wall_bottom;
+                cell_category |= m3_cell_flag_wall | m3_cell_flag_wall_bottom;
             }
 
             if( c > 0 &&
@@ -97,7 +97,7 @@ board_build( const struct m3_options*   options,
                 r > 0 &&
                 r < ( rows - 1 ) )
             {
-                cell_category |= cell_mask_color | cell_mask_color_open;
+                cell_category |= m3_cell_flag_color | m3_cell_flag_color_open;
                 cell_current->right_routine = &match_horizontal;
                 cell_current->bottom_routine = &match_vertical;
             }
@@ -153,7 +153,7 @@ board_rand( const struct m3_options*    options,
 
     while( cell_current != NULL )
     {
-        if( cell_current->category == ( cell_mask_color | cell_mask_color_open ) )
+        if( cell_current->category == ( m3_cell_flag_color | m3_cell_flag_color_open ) )
         {
             cell_rand( options, cell_current );
         }
@@ -215,7 +215,7 @@ board_destroy( struct m3_cell* board )
 
     // destroy the 1 undefined wall that is re-used alot
     assert( board->top);
-    assert( board->top->category == ( cell_mask_wall | cell_mask_wall_undefined ) );
+    assert( board->top->category == ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) );
     free( board->top );
 
     free( board );
