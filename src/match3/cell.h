@@ -11,6 +11,9 @@
 struct m3_cell {
     uint8_t             category;
 
+    uint8_t             column;
+    uint8_t             row;
+
     struct m3_cell*     top;
     struct m3_cell*     right;
     struct m3_cell*     bottom;
@@ -23,6 +26,8 @@ struct m3_cell {
 
 #define M3_CELL_CONST { \
     m3_cell_flag_wall | m3_cell_flag_wall_undefined,   \
+    0,      \
+    0,      \
     NULL,   \
     NULL,   \
     NULL,   \

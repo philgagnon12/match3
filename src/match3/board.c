@@ -104,6 +104,9 @@ board_build( const struct m3_options*   options,
 
             cell_current->category = cell_category;
 
+            cell_current->column = c;
+            cell_current->row    = r;
+
             cell_current->top = cell_top;
             cell_top->bottom = cell_current;
 
