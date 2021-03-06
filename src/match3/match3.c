@@ -118,7 +118,7 @@ main( int argc, char* argv[] )
         printf("\n");
 
         // swap match and clear
-        swap( (struct m3_cell**)&match_help_result.swap_subject, (struct m3_cell**)&match_help_result.swap_target );
+        m3_swap( (struct m3_cell**)&match_help_result.swap_subject, (struct m3_cell**)&match_help_result.swap_target );
 
         struct m3_match_result match_result = M3_MATCH_RESULT_CONST;
 

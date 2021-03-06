@@ -71,6 +71,9 @@ match_cell( const struct m3_options* options,
             const struct m3_cell*    cell,
             struct m3_match_result*  match_result );
 
+// TODO match_either_cell
+// will try to do a match on cell_a if no match will try cell_b 
+
 void
 match_vertical( const struct m3_options* options,
                 const struct m3_cell*    cell,

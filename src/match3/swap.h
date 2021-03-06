@@ -19,8 +19,8 @@ extern "C" {
 // TODO  swap_to_match would only swap when a match can happen
 // TODO swap_freedom would let a user do a swap even when there would be no match
 void
-swap( struct m3_cell**   subject,
-      struct m3_cell**   target );
+m3_swap( struct m3_cell**   subject,
+         struct m3_cell**   target );
 void
 swap_top( struct m3_cell**   subject,
           struct m3_cell**   target );
