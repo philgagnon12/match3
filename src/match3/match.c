@@ -136,6 +136,41 @@ m3_match_cell( const struct m3_options* options,
 }
 
 void
+m3_match_either_cell( const struct m3_options* options,
+                      const struct m3_cell*    cell_a,
+                      const struct m3_cell*    cell_b,
+                      struct m3_match_result*  match_result,
+                      const struct m3_cell**   cell_a_or_b)
+{
+    assert( options );
+    assert( cell_a );
+    assert( cell_b );
+    assert( match_result );
+    // cell_a_or_b optional
+
+    const struct m3_cell* cells[] = {
+        cell_a,
+        cell_b
+    };
+
+    for(uint8_t i = 0; i < (uint8_t)(sizeof(cells) / sizeof(struct m3_cell*)); i++)
+    {
+        m3_match_cell( options,
+                       cells[i],
+                       match_result );
+
+        if( match_result->matched_count >= options->matches_required_to_clear )
+        {
+            if( cell_a_or_b != NULL )
+            {
+                *cell_a_or_b = cells[i];
+            }
+            break;
+        }
+    }
+}
+
+void
 m3_match_vertical( const struct m3_options* options,
                    const struct m3_cell*    cell,
                    struct m3_match_result*  match_result )
@@ -298,16 +333,11 @@ m3_match_help( const struct m3_options*      options,
 
                 if( subject != NULL && target != NULL )
                 {
-                    for( uint8_t j = 0; match_help_result->swap_match == NULL && j < sizeof( subject_and_target ) / sizeof( struct m3_cell**); j++ )
-                    {
-                        m3_match_cell( options, *subject_and_target[j], &match_result );
-
-                        if( match_result.matched_count >= options->matches_required_to_clear )
-                        {
-                            match_help_result->swap_match = match_result.matched[0];
-                            break;
-                        }
-                    }
+                    m3_match_either_cell( options,
+                                          subject,
+                                          target,
+                                          &match_result,
+                                          &match_help_result->swap_match );
 
                     swap_routines[i]( &subject, &target );
 

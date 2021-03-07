@@ -1,0 +1,1 @@
+* shuffling board has to get smart either quit after a certain number of iterations or just plain better. atm a process can hang while trying to shuffle forever
