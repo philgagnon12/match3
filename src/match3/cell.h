@@ -20,8 +20,8 @@ struct m3_cell {
     struct m3_cell*     left;
     struct m3_cell*     next;
 
-    match_routine*      right_routine;
-    match_routine*      bottom_routine;
+    m3_match_routine*      right_routine;
+    m3_match_routine*      bottom_routine;
 };
 
 #define M3_CELL_CONST { \
@@ -42,21 +42,25 @@ extern "C" {
 #endif
 
 void
-cell_rand( const struct m3_options* options,
-           struct m3_cell*          cell );
+m3_cell_rand( const struct m3_options* options,
+              struct m3_cell*          cell );
 
 void
-cell_find_first_top_color( const struct m3_cell*    board,
-                           const struct m3_cell**   cell_first_top_color );
+m3_cell_find_first_top_color( const struct m3_cell*    board,
+                              const struct m3_cell**   cell_first_top_color );
 
 // a color cell can fall through color-open cell
 void
-cell_fallthrough( const struct m3_options* options,
-                  struct m3_cell**         cell );
+m3_cell_fallthrough( const struct m3_options* options,
+                     struct m3_cell**         cell );
 
 void
-cell_star_unique( const struct m3_options* options,
-                  struct m3_cell*          cell );
+m3_cell_star_unique( const struct m3_options* options,
+                     struct m3_cell*          cell );
+
+uint8_t
+m3_cell_are_neighbours( struct m3_cell* subject,
+                        struct m3_cell* target );
 
 #ifdef __cplusplus
 }

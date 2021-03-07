@@ -7,8 +7,8 @@
 #include "match3/match3.h"
 #include "match3/cell.h"
 
-typedef void(swap_routine)( struct m3_cell**   subject,
-                            struct m3_cell**   target );
+typedef void(m3_swap_routine)( struct m3_cell**   subject,
+                               struct m3_cell**   target );
 
 
 #ifdef __cplusplus
@@ -22,18 +22,18 @@ void
 m3_swap( struct m3_cell**   subject,
          struct m3_cell**   target );
 void
-swap_top( struct m3_cell**   subject,
-          struct m3_cell**   target );
+m3_swap_top( struct m3_cell**   subject,
+             struct m3_cell**   target );
 
 void
-swap_right( struct m3_cell**   subject,
-            struct m3_cell**   target );
+m3_swap_right( struct m3_cell**   subject,
+               struct m3_cell**   target );
 void
-swap_bottom( struct m3_cell**   subject,
-             struct m3_cell**   target );
+m3_swap_bottom( struct m3_cell**   subject,
+                struct m3_cell**   target );
 void
-swap_left( struct m3_cell**   subject,
-           struct m3_cell**   target );
+m3_swap_left( struct m3_cell**   subject,
+              struct m3_cell**   target );
 
 #ifdef __cplusplus
 }

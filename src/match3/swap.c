@@ -37,8 +37,8 @@ m3_swap( struct m3_cell**   subject,
 }
 
 void
-swap_top( struct m3_cell**   subject,
-          struct m3_cell**   target )
+m3_swap_top( struct m3_cell**   subject,
+             struct m3_cell**   target )
 {
     assert( subject );
     assert( target );
@@ -49,8 +49,8 @@ swap_top( struct m3_cell**   subject,
 }
 
 void
-swap_right( struct m3_cell**   subject,
-            struct m3_cell**   target )
+m3_swap_right( struct m3_cell**   subject,
+               struct m3_cell**   target )
 {
     assert( subject );
     assert( target );
@@ -61,8 +61,8 @@ swap_right( struct m3_cell**   subject,
 }
 
 void
-swap_bottom( struct m3_cell**   subject,
-             struct m3_cell**   target )
+m3_swap_bottom( struct m3_cell**   subject,
+                struct m3_cell**   target )
 {
     assert( subject );
     assert( target );
@@ -73,8 +73,8 @@ swap_bottom( struct m3_cell**   subject,
 }
 
 void
-swap_left( struct m3_cell**   subject,
-           struct m3_cell**   target )
+m3_swap_left( struct m3_cell**   subject,
+              struct m3_cell**   target )
 {
     assert( subject );
     assert( target );

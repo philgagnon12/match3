@@ -16,9 +16,9 @@ struct m3_match_result
   0     \
 }
 
-typedef void(match_routine)( const struct m3_options* options,
-                             const struct m3_cell*    self,
-                             struct m3_match_result*  matched_result );
+typedef void(m3_match_routine)( const struct m3_options* options,
+                                const struct m3_cell*    self,
+                                struct m3_match_result*  matched_result );
 
 
 ///
@@ -48,41 +48,41 @@ extern "C" {
 // Will allocate memory for matched
 // and reset the array and count
 void
-match_result_init( struct m3_match_result* match_result,
-                   const struct m3_cell*   cell );
+m3_match_result_init( struct m3_match_result* match_result,
+                      const struct m3_cell*   cell );
 
 // Will increase size of array if needed
 // add a match result
 void
-match_result_add_match( struct m3_match_result* match_result,
-                        const struct m3_cell*   cell );
+m3_match_result_add_match( struct m3_match_result* match_result,
+                           const struct m3_cell*   cell );
 
 void
-match_result_destroy( struct m3_match_result* match_result );
+m3_match_result_destroy( struct m3_match_result* match_result );
 
 // call once only per board
 void
-match( const struct m3_options* options,
-       const struct m3_cell*    cell,
-       struct m3_match_result*  match_result );
+m3_match( const struct m3_options* options,
+          const struct m3_cell*    cell,
+          struct m3_match_result*  match_result );
 
 void
-match_cell( const struct m3_options* options,
-            const struct m3_cell*    cell,
-            struct m3_match_result*  match_result );
+m3_match_cell( const struct m3_options* options,
+               const struct m3_cell*    cell,
+               struct m3_match_result*  match_result );
 
 // TODO match_either_cell
 // will try to do a match on cell_a if no match will try cell_b 
 
 void
-match_vertical( const struct m3_options* options,
-                const struct m3_cell*    cell,
-                struct m3_match_result*  match_result );
+m3_match_vertical( const struct m3_options* options,
+                   const struct m3_cell*    cell,
+                   struct m3_match_result*  match_result );
 
 void
-match_horizontal( const struct m3_options* options,
-                  const struct m3_cell*    cell,
-                  struct m3_match_result*  match_result );
+m3_match_horizontal( const struct m3_options* options,
+                     const struct m3_cell*    cell,
+                     struct m3_match_result*  match_result );
 
 
 ///
@@ -93,19 +93,19 @@ match_horizontal( const struct m3_options* options,
 // 2. match_cell( options, swap_match, &match_result )
 // You will obtain a match_result that can be used on match_clear()
 void
-match_help( const struct m3_options*      options,
-            struct m3_cell*               board,
-            struct m3_match_help_result*  match_help_result );
+m3_match_help( const struct m3_options*      options,
+               struct m3_cell*               board,
+               struct m3_match_help_result*  match_help_result );
 int
-match_help_has_swapped_and_matched( struct m3_match_help_result match_help_result );
+m3_match_help_has_swapped_and_matched( struct m3_match_help_result match_help_result );
 
 void
-match_clear( const struct m3_options* options,
-             struct m3_match_result*  match_result );
+m3_match_clear( const struct m3_options* options,
+                struct m3_match_result*  match_result );
 
 void
-match_clear_sort( const struct m3_options*  options,
-                  struct m3_match_result*   match_result );
+m3_match_clear_sort( const struct m3_options*  options,
+                     struct m3_match_result*   match_result );
 
 #ifdef __cplusplus
 }

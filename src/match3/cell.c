@@ -7,8 +7,8 @@
 #include "match3/swap.h"
 
 void
-cell_rand( const struct m3_options* options,
-           struct m3_cell*          cell )
+m3_cell_rand( const struct m3_options* options,
+              struct m3_cell*          cell )
 {
     assert( options );
     assert( cell );
@@ -32,8 +32,8 @@ cell_rand( const struct m3_options* options,
 }
 
 void
-cell_find_first_top_color( const struct m3_cell*    board,
-                           const struct m3_cell**   cell_first_top_color )
+m3_cell_find_first_top_color( const struct m3_cell*    board,
+                              const struct m3_cell**   cell_first_top_color )
 {
 
     assert(board);
@@ -59,8 +59,8 @@ cell_find_first_top_color( const struct m3_cell*    board,
 
 // a color cell can fall through color-open cell
 void
-cell_fallthrough( const struct m3_options* options,
-                  struct m3_cell**         cell )
+m3_cell_fallthrough( const struct m3_options* options,
+                     struct m3_cell**         cell )
 {
     assert( options );
     assert( cell );
@@ -79,7 +79,7 @@ cell_fallthrough( const struct m3_options* options,
 
         if( subject->bottom->category == (m3_cell_flag_color | m3_cell_flag_color_open ))
         {
-            swap_bottom( &subject, &target );
+            m3_swap_bottom( &subject, &target );
             subject = target;
         }
         else
@@ -91,15 +91,15 @@ cell_fallthrough( const struct m3_options* options,
 }
 
 int
-cell_star_unique_compar( const void* a, const void* b)
+m3_cell_star_unique_compar( const void* a, const void* b)
 {
     int rand_int = rand();
     return rand_int;
 }
 
 void
-cell_star_unique( const struct m3_options* options,
-                  struct m3_cell*          cell )
+m3_cell_star_unique( const struct m3_options* options,
+                     struct m3_cell*          cell )
 {
     assert( options );
     assert( cell );
@@ -116,9 +116,9 @@ cell_star_unique( const struct m3_options* options,
     qsort( options->colors,
            options->colors_size / sizeof( uint8_t ),
            sizeof( uint8_t ),
-           &cell_star_unique_compar );
+           &m3_cell_star_unique_compar );
 
-    uint8_t const_colors_count = options->colors_size / sizeof( uint8_t );
+    uint8_t const_colors_count = (uint8_t)(options->colors_size / sizeof( uint8_t ));
     uint8_t colors_count = const_colors_count;
 
     for( uint8_t i = 0; i < sizeof( cells ) / sizeof( struct m3_cells* ); i++ )
@@ -137,3 +137,20 @@ cell_star_unique( const struct m3_options* options,
 
 }
 
+uint8_t
+m3_cell_are_neighbours( struct m3_cell* subject,
+                        struct m3_cell* target )
+{
+    assert( subject );
+    assert( target );
+
+    if( subject->top    == target && target->bottom == subject ||
+        subject->right  == target && target->left   == subject ||
+        subject->bottom == target && target->top    == subject ||
+        subject->left   == target && target->right  == subject  )
+    {
+        return 1;
+    }
+
+    return 0; // false
+}

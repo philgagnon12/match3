@@ -87,34 +87,34 @@ main( int argc, char* argv[] )
 
     struct m3_cell* board = NULL;
 
-    board_build( &options, &board );
+    m3_board_build( &options, &board );
 
-    board_rand( &options, board);
+    m3_board_rand( &options, board);
 
 
-    board_shuffle( &options, board->right->bottom );
+    m3_board_shuffle( &options, board->right->bottom );
 
-    print_board( *board );
+    m3_print_board( *board );
     printf("\n");
 
     struct m3_match_help_result match_help_result = M3_MATCH_HELP_RESULT_CONST;
 
 
-    match_help( &options,
-                board->right->bottom,
-                &match_help_result );
+    m3_match_help( &options,
+                   board->right->bottom,
+                   &match_help_result );
 
-    if( !match_help_has_swapped_and_matched( match_help_result ) )
+    if( !m3_match_help_has_swapped_and_matched( match_help_result ) )
     {
         printf("No way to end the game\n");
     }
     else
     {
         printf("\n\nSwap\n\n");
-        print_neighbours( *match_help_result.swap_subject );
+        m3_print_neighbours( *match_help_result.swap_subject );
         printf("\n");
         printf("With\n\n");
-        print_neighbours( *match_help_result.swap_target );
+        m3_print_neighbours( *match_help_result.swap_target );
         printf("\n");
 
         // swap match and clear
@@ -122,31 +122,31 @@ main( int argc, char* argv[] )
 
         struct m3_match_result match_result = M3_MATCH_RESULT_CONST;
 
-        match_cell( &options, match_help_result.swap_match, &match_result );
+        m3_match_cell( &options, match_help_result.swap_match, &match_result );
 
-        match_clear( &options, &match_result );
+        m3_match_clear( &options, &match_result );
 
 
-        print_board( *board );
+        m3_print_board( *board );
         printf("\n");
 
-        match_clear_sort( &options, &match_result );
+        m3_match_clear_sort( &options, &match_result );
 
-        match_result_destroy( &match_result );
+        m3_match_result_destroy( &match_result );
 
-        print_board( *board );
+        m3_print_board( *board );
         printf("\n");
 
-        board_rand( &options, board );
+        m3_board_rand( &options, board );
 
-        print_board( *board);
+        m3_print_board( *board);
         printf("\n");
     }
 
 
     printf("seed %d\n", seed );
 
-    board_destroy( board );
+    m3_board_destroy( board );
     printf("done\n");
 
     return 0;

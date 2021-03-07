@@ -8,19 +8,19 @@ extern "C" {
 #endif
 
 void
-board_build( const struct m3_options*   options,
-             struct m3_cell**           board );
+m3_board_build( const struct m3_options*   options,
+                struct m3_cell**           board );
 
 void
-board_rand( const struct m3_options*    options,
-            struct m3_cell*             board );
+m3_board_rand( const struct m3_options*    options,
+               struct m3_cell*             board );
 
 void
-board_shuffle( const struct m3_options* options,
-               struct m3_cell*          board );
+m3_board_shuffle( const struct m3_options* options,
+                  struct m3_cell*          board );
 
 void
-board_destroy( struct m3_cell* board );
+m3_board_destroy( struct m3_cell* board );
 
 #ifdef __cplusplus
 }

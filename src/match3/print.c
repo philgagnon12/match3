@@ -6,7 +6,7 @@
 #include <match3/print.h>
 
 void
-print_cell( const struct m3_cell cell )
+m3_print_cell( const struct m3_cell cell )
 {
     switch( cell.category )
     {
@@ -56,22 +56,22 @@ print_cell( const struct m3_cell cell )
 }
 
 void
-print_neighbours( const struct m3_cell cell )
+m3_print_neighbours( const struct m3_cell cell )
 {
     printf(" ");
-    print_cell( *cell.top );
+    m3_print_cell( *cell.top );
     printf("\n");
-    print_cell( *cell.left );
-    print_cell( cell );
-    print_cell( *cell.right );
+    m3_print_cell( *cell.left );
+    m3_print_cell( cell );
+    m3_print_cell( *cell.right );
     printf("\n");
     printf(" ");
-    print_cell( *cell.bottom );
+    m3_print_cell( *cell.bottom );
     printf("\n");
 }
 
 void
-print_board( const struct m3_cell cell )
+m3_print_board( const struct m3_cell cell )
 {
     const struct m3_cell* cell_left_most    = &cell;
     const struct m3_cell* cell_current      = &cell;
@@ -80,7 +80,7 @@ print_board( const struct m3_cell cell )
     while( ( cell_current->category | ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) ) != ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) )
     {
 
-        print_cell( *cell_current );
+        m3_print_cell( *cell_current );
 
         if( ( cell_current->category & ( m3_cell_flag_wall | m3_cell_flag_wall_right ) ) == ( m3_cell_flag_wall | m3_cell_flag_wall_right ) )
         {
@@ -97,7 +97,7 @@ print_board( const struct m3_cell cell )
 }
 
 void
-print_board_info( const struct m3_cell cell )
+m3_print_board_info( const struct m3_cell cell )
 {
     const struct m3_cell* cell_left_most    = &cell;
     const struct m3_cell* cell_current      = &cell;
@@ -106,7 +106,7 @@ print_board_info( const struct m3_cell cell )
     while( ( cell_current->category | ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) ) != ( m3_cell_flag_wall | m3_cell_flag_wall_undefined ) )
     {
 
-        print_neighbours( *cell_current );
+        m3_print_neighbours( *cell_current );
         printf("\n");
 
         if( ( cell_current->category & ( m3_cell_flag_wall | m3_cell_flag_wall_right ) ) == ( m3_cell_flag_wall | m3_cell_flag_wall_right ) )

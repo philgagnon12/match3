@@ -8,8 +8,8 @@
 
 
 void
-board_build( const struct m3_options*   options,
-             struct m3_cell**           board )
+m3_board_build( const struct m3_options*   options,
+                struct m3_cell**           board )
 {
     assert( options );
     assert( board );
@@ -98,8 +98,8 @@ board_build( const struct m3_options*   options,
                 r < ( rows - 1 ) )
             {
                 cell_category |= m3_cell_flag_color | m3_cell_flag_color_open;
-                cell_current->right_routine = &match_horizontal;
-                cell_current->bottom_routine = &match_vertical;
+                cell_current->right_routine = &m3_match_horizontal;
+                cell_current->bottom_routine = &m3_match_vertical;
             }
 
             cell_current->category = cell_category;
@@ -146,8 +146,8 @@ board_build( const struct m3_options*   options,
 }
 
 void
-board_rand( const struct m3_options*    options,
-            struct m3_cell*             cell )
+m3_board_rand( const struct m3_options*    options,
+               struct m3_cell*             cell )
 {
 
     assert( cell );
@@ -158,7 +158,7 @@ board_rand( const struct m3_options*    options,
     {
         if( cell_current->category == ( m3_cell_flag_color | m3_cell_flag_color_open ) )
         {
-            cell_rand( options, cell_current );
+            m3_cell_rand( options, cell_current );
         }
 
         cell_current = cell_current->next;
@@ -166,8 +166,8 @@ board_rand( const struct m3_options*    options,
 }
 
 void
-board_shuffle( const struct m3_options* options,
-               struct m3_cell*          board )
+m3_board_shuffle( const struct m3_options* options,
+                  struct m3_cell*          board )
 {
     assert( options );
     assert( board );
@@ -184,25 +184,25 @@ board_shuffle( const struct m3_options* options,
         while( matched_result.matched_count >= options->matches_required_to_clear )
         {
             matched_result.matched_count = 1;
-            cell_rand( options, matched_result_first_cell );
-            match_cell( options, matched_result_first_cell, &matched_result );
+            m3_cell_rand( options, matched_result_first_cell );
+            m3_match_cell( options, matched_result_first_cell, &matched_result );
             matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
         }
 
-        match( options, matched_result_first_cell, &matched_result );
+        m3_match( options, matched_result_first_cell, &matched_result );
         matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
         //print_board( *board->top->left );
         //printf("\n");
 
     }
 
-    match_result_destroy(&matched_result);
+    m3_match_result_destroy(&matched_result);
 
     printf("shuffled\n");
 }
 
 void
-board_destroy( struct m3_cell* board )
+m3_board_destroy( struct m3_cell* board )
 {
     assert( board );
 
