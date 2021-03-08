@@ -144,10 +144,10 @@ m3_cell_are_neighbours( struct m3_cell* subject,
     assert( subject );
     assert( target );
 
-    if( subject->top    == target && target->bottom == subject ||
-        subject->right  == target && target->left   == subject ||
-        subject->bottom == target && target->top    == subject ||
-        subject->left   == target && target->right  == subject  )
+    if( ( subject->top    == target && target->bottom == subject ) ||
+        ( subject->right  == target && target->left   == subject ) ||
+        ( subject->bottom == target && target->top    == subject ) ||
+        ( subject->left   == target && target->right  == subject )  )
     {
         return 1;
     }

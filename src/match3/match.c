@@ -242,8 +242,6 @@ m3_match_horizontal( const struct m3_options* options,
     const struct m3_cell* cell_right = cell->right;
     const struct m3_cell* cell_left = cell->left;
 
-    const struct m3_cell**     matched_re = NULL;
-
     m3_match_result_init( match_result, cell);
 
     while( cell_current->category == cell_right->category )
@@ -310,11 +308,6 @@ m3_match_help( const struct m3_options*      options,
         &m3_swap_right,
         &m3_swap_bottom,
         &m3_swap_left
-    };
-
-    struct m3_cell** subject_and_target[] = {
-        &subject,
-        &target
     };
 
     // Reset
