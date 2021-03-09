@@ -34,6 +34,8 @@ m3_board_build( const struct m3_options*   options,
     struct m3_cell* cell_left       = NULL;
     struct m3_cell* cell_previous   = NULL;
 
+    // Reset
+    *board = NULL;
 
     srand( options->seed );
 

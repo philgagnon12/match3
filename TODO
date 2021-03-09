@@ -1,1 +1,3 @@
 * shuffling board has to get smart either quit after a certain number of iterations or just plain better. atm a process can hang while trying to shuffle forever
+
+* engine_cells are supposed to be the base cells added through the tree , ive mis used that word/term
