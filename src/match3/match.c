@@ -108,8 +108,8 @@ m3_match_cell( const struct m3_options* options,
     assert( match_result );
 
     m3_match_routine* routines[] = {
-        cell->bottom_routine,
-        cell->right_routine
+        cell->vertical_routine,
+        cell->horizontal_routine
     };
 
     if( ( cell->category & m3_cell_flag_wall ) == m3_cell_flag_wall )
@@ -123,6 +123,8 @@ m3_match_cell( const struct m3_options* options,
         {
             continue;
         }
+
+        m3_match_result_init( match_result, cell);
 
         // Match algorythm ( down / right traversal )
         routines[i]( options, cell, match_result );
@@ -182,22 +184,30 @@ m3_match_vertical( const struct m3_options* options,
     assert( match_result );
 
 
-    uint8_t match_count = 1;
     const struct m3_cell* cell_current = cell;
     const struct m3_cell* cell_top = cell->top;
     const struct m3_cell* cell_bottom = cell->bottom;
 
+    const struct m3_cell* cell_top_most = cell;
+    const struct m3_cell* cell_bottom_most = cell;
 
+    const struct m3_cell** cell_edges[] = {
+        &cell_top_most,
+        &cell_bottom_most
+    };
 
-    m3_match_result_init( match_result, cell);
+    struct m3_cell* cell_temp_mut = NULL;
+    m3_match_routine* horizontal_routine = NULL;
+    m3_match_routine* vertical_routine = NULL;
+
 
     while( cell_current->category == cell_top->category )
     {
 
         m3_match_result_add_match( match_result, cell_top);
 
-        match_count++;
         cell_current = cell_top;
+        cell_top_most = cell_top;
         cell_top = cell_top->top;
     }
 
@@ -207,22 +217,35 @@ m3_match_vertical( const struct m3_options* options,
     {
         m3_match_result_add_match( match_result, cell_bottom);
 
-        match_count++;
         cell_current = cell_bottom;
+        cell_bottom_most = cell_bottom;
         cell_bottom = cell_bottom->bottom;
     }
 
 
-    if( match_count >= options->matches_required_to_clear )
+    if( match_result->matched_count >= options->matches_required_to_clear )
     {
+        // Allows for L and T matches
+        if( cell->horizontal_routine != NULL )
+        {
+            for( uint8_t i = 0; i < sizeof(cell_edges) / sizeof(const struct m3_cell**); i++)
+            {
+                // Allows to assign to const cell
+                cell_temp_mut = (struct m3_cell*)*cell_edges[i];
 
-        // printf("\nits bottom a match %02X %d\n", cell->category, match_count );
+                // Store and unset to not infinitely call each other
+                horizontal_routine = cell_temp_mut->horizontal_routine;
+                vertical_routine = cell_temp_mut->vertical_routine;
 
-        // for( uint8_t i = 0; i < match_result->matched_count; i++ )
-        // {
-        //     print_neighbours( *match_result->matched[i] );
-        // }
+                cell_temp_mut->horizontal_routine = NULL;
+                cell_temp_mut->vertical_routine = NULL;
 
+                horizontal_routine(options, (const struct m3_cell*)cell_temp_mut, match_result);
+
+                cell_temp_mut->horizontal_routine = horizontal_routine;
+                cell_temp_mut->vertical_routine = vertical_routine;
+            }
+        }
     }
 }
 
@@ -237,19 +260,28 @@ m3_match_horizontal( const struct m3_options* options,
     assert( cell->left );
     assert( match_result );
 
-    uint8_t match_count = 1;
     const struct m3_cell* cell_current = cell;
     const struct m3_cell* cell_right = cell->right;
     const struct m3_cell* cell_left = cell->left;
 
-    m3_match_result_init( match_result, cell);
+    const struct m3_cell* cell_right_most = cell;
+    const struct m3_cell* cell_left_most = cell;
+
+    const struct m3_cell** cell_edges[] = {
+        &cell_right_most,
+        &cell_left_most
+    };
+
+    struct m3_cell* cell_temp_mut = (struct m3_cell*)cell;
+    m3_match_routine* horizontal_routine = NULL;
+    m3_match_routine* vertical_routine = NULL;
 
     while( cell_current->category == cell_right->category )
     {
         m3_match_result_add_match( match_result, cell_right);
 
-        match_count++;
         cell_current = cell_right;
+        cell_right_most = cell_right;
         cell_right = cell_current->right;
 
     }
@@ -260,21 +292,36 @@ m3_match_horizontal( const struct m3_options* options,
     {
         m3_match_result_add_match( match_result, cell_left);
 
-        match_count++;
         cell_current = cell_left;
+        cell_left_most = cell_left;
         cell_left = cell_current->left;
 
     }
 
 
-    if( match_count >= options->matches_required_to_clear )
+    if( match_result->matched_count >= options->matches_required_to_clear )
     {
-        // printf("\nits right a match %02X %d\n", cell->category, match_count );
+        // Allows for L and T matches
+        if( cell->vertical_routine != NULL )
+        {
+            for( uint8_t i = 0; i < sizeof(cell_edges) / sizeof(const struct m3_cell**); i++)
+            {
+                // Allows to assign to const cell
+                cell_temp_mut = (struct m3_cell*)*cell_edges[i];
 
-        // for( uint8_t i = 0; i < match_result->matched_count; i++ )
-        // {
-        //     print_neighbours( *match_result->matched[i] );
-        // }
+                // Store and unset to not infinitely call each other
+                horizontal_routine = cell_temp_mut->horizontal_routine;
+                vertical_routine = cell_temp_mut->vertical_routine;
+
+                cell_temp_mut->horizontal_routine = NULL;
+                cell_temp_mut->vertical_routine = NULL;
+
+                vertical_routine(options, (const struct m3_cell*)cell_temp_mut, match_result);
+
+                cell_temp_mut->horizontal_routine = horizontal_routine;
+                cell_temp_mut->vertical_routine = vertical_routine;
+            }
+        }
     }
 }
 

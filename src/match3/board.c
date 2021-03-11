@@ -100,8 +100,8 @@ m3_board_build( const struct m3_options*   options,
                 r < ( rows - 1 ) )
             {
                 cell_category |= m3_cell_flag_color | m3_cell_flag_color_open;
-                cell_current->right_routine = &m3_match_horizontal;
-                cell_current->bottom_routine = &m3_match_vertical;
+                cell_current->horizontal_routine = &m3_match_horizontal;
+                cell_current->vertical_routine = &m3_match_vertical;
             }
 
             cell_current->category = cell_category;
@@ -193,8 +193,6 @@ m3_board_shuffle( const struct m3_options* options,
 
         m3_match( options, matched_result_first_cell, &matched_result );
         matched_result_first_cell = (struct m3_cell*)matched_result.matched[0];
-        //print_board( *board->top->left );
-        //printf("\n");
 
     }
 

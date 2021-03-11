@@ -20,8 +20,8 @@ struct m3_cell {
     struct m3_cell*     left;
     struct m3_cell*     next;
 
-    m3_match_routine*      right_routine;
-    m3_match_routine*      bottom_routine;
+    m3_match_routine*      horizontal_routine;
+    m3_match_routine*      vertical_routine;
 };
 
 #define M3_CELL_CONST { \
