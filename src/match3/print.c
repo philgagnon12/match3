@@ -121,3 +121,23 @@ m3_print_board_info( const struct m3_cell cell )
     } // while
 }
 
+void
+m3_print_bits( const uint8_t byte )
+{
+    for( uint8_t i = 0x80; i != 0; i = i >> 1 )
+    {
+        if( ( byte & i ) == i )
+        {
+            printf( "1" );
+        }
+        else
+        {
+            printf( "0" );
+        }
+
+        if( i == 0x10 )
+        {
+            printf( " " );
+        }
+    }
+}

@@ -30,7 +30,7 @@ enum m3_cell_colors {
 
 
 struct m3_options {
-    int                 seed;
+    unsigned int        seed;
     uint8_t             columns;
     uint8_t             rows;
     uint8_t             matches_required_to_clear;

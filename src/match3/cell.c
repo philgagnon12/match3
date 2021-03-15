@@ -7,8 +7,8 @@
 #include "match3/swap.h"
 
 void
-m3_cell_rand( const struct m3_options* options,
-              struct m3_cell*          cell )
+m3_cell_rand( struct m3_options* options,
+              struct m3_cell*    cell )
 {
     assert( options );
     assert( cell );
@@ -18,7 +18,7 @@ m3_cell_rand( const struct m3_options* options,
 
     if( ( cell->category & m3_cell_flag_color ) == m3_cell_flag_color )
     {
-        rand_color = rand();
+        rand_color = rand_r(&options->seed);
 
         for( uint8_t c = 0; c < options->colors_size / sizeof( uint8_t ); c++ )
         {
@@ -93,8 +93,10 @@ m3_cell_fallthrough( const struct m3_options* options,
 int
 m3_cell_star_unique_compar( const void* a, const void* b)
 {
-    int rand_int = rand();
-    return rand_int;
+    // got rid of rand() in favor of rand_r
+    // int rand_int = rand();
+    // return rand_int;
+    return m3_cell_color_red; // TODO 
 }
 
 void

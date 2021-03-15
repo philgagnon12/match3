@@ -148,8 +148,8 @@ m3_board_build( const struct m3_options*   options,
 }
 
 void
-m3_board_rand( const struct m3_options*    options,
-               struct m3_cell*             cell )
+m3_board_rand( struct m3_options*   options,
+               struct m3_cell*      cell )
 {
 
     assert( cell );
@@ -168,8 +168,8 @@ m3_board_rand( const struct m3_options*    options,
 }
 
 void
-m3_board_shuffle( const struct m3_options* options,
-                  struct m3_cell*          board )
+m3_board_shuffle( struct m3_options* options,
+                  struct m3_cell*    board )
 {
     assert( options );
     assert( board );

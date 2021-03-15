@@ -6,6 +6,7 @@ add_executable( match3
     cell.c
     board.c
     print.c
+    state.c
 )
 
 target_include_directories( match3 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/.." )

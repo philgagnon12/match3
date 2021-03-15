@@ -11,6 +11,7 @@
 #include <match3/swap.h>
 #include <match3/board.h>
 #include <match3/print.h>
+#include <match3/state.h>
 
 void
 usage(int argc, char* argv[])
@@ -143,8 +144,15 @@ main( int argc, char* argv[] )
         printf("\n");
     }
 
+    char* state = NULL;
+    int state_size = 0;
 
-    printf("seed %d\n", seed );
+    m3_state_save( &options,
+                   board,
+                   &state,
+                   &state_size );
+
+    printf("seed %d\n", options.seed );
 
     m3_board_destroy( board );
     printf("done\n");

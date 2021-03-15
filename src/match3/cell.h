@@ -42,8 +42,8 @@ extern "C" {
 #endif
 
 void
-m3_cell_rand( const struct m3_options* options,
-              struct m3_cell*          cell );
+m3_cell_rand( struct m3_options* options,
+              struct m3_cell*    cell );
 
 void
 m3_cell_find_first_top_color( const struct m3_cell*    board,
