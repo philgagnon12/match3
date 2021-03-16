@@ -14,11 +14,11 @@ m3_board_build( const struct m3_options*   options,
     assert( options );
     assert( board );
 
-    uint8_t columns = options->columns;
-    uint8_t rows = options->rows;
+    uint8_t columns = options->columns + 2; // right & left wall
+    uint8_t rows = options->rows + 2; // top & bottom wall
 
-    assert( columns > 0 );
-    assert( rows > 0 );
+    assert( columns > 2 );
+    assert( rows > 2 );
 
     uint8_t cell_category = 0;
 

@@ -18,7 +18,9 @@ m3_cell_rand( struct m3_options* options,
 
     if( ( cell->category & m3_cell_flag_color ) == m3_cell_flag_color )
     {
-        rand_color = rand_r(&options->seed);
+        // TODO wrap rand and srand so that i dont forget to do this sequence when using a random number
+        options->seed = rand_color = rand();
+        srand(options->seed);
 
         for( uint8_t c = 0; c < options->colors_size / sizeof( uint8_t ); c++ )
         {
@@ -93,7 +95,7 @@ m3_cell_fallthrough( const struct m3_options* options,
 int
 m3_cell_star_unique_compar( const void* a, const void* b)
 {
-    // got rid of rand() in favor of rand_r
+    // rand() needs to set options->seed
     // int rand_int = rand();
     // return rand_int;
     return m3_cell_color_red; // TODO 

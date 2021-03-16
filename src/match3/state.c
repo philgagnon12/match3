@@ -95,6 +95,19 @@ m3_state_save( const struct m3_options* options,
         cell_current = cell_current->next;
     } // while
 
+    state_buffer_size_req = sizeof( options->seed ) +
+                            sizeof( options->columns ) +
+                            state_buffer_size;
+
+    state_buffer_re = realloc( state_buffer, state_buffer_size_req );
+    assert(state_buffer_re);
+    state_buffer_size = state_buffer_size_req;
+    state_buffer = state_buffer_re;
+
+    state_buffer = state_buffer >> (sizeof( options->columns )*8);
+    *state_buffer = options->columns;
+
+
     for(int i = 0; i < state_buffer_size; i++)
     {
         m3_print_bits(state_buffer[i]);
