@@ -1,13 +1,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include <assert.h>
 
 #include "match3/match3.h"
 #include "match3/cell.h"
-
-
-#include "match3/print.h" // TODO remove
 
 void
 m3_state_save( const struct m3_options* options,
@@ -29,10 +27,10 @@ m3_state_save( const struct m3_options* options,
 
     int cell_count = 0;
 
-    uint8_t* state_buffer = NULL;
-    int state_buffer_size = 0;
-    uint8_t* state_buffer_re = NULL;
-    int state_buffer_size_req = 0;
+    uint8_t* cells = NULL;
+    int cells_size = 0;
+    uint8_t* cells_re = NULL;
+    int cells_size_req = 0;
 
     uint8_t* color_index = NULL;
 
@@ -52,7 +50,6 @@ m3_state_save( const struct m3_options* options,
     {
         most_sign_bit_pos = 8;
     }
-    printf("most_sign_bit_pos %u\n", most_sign_bit_pos );
 
     while( cell_current != NULL )
     {
@@ -62,14 +59,14 @@ m3_state_save( const struct m3_options* options,
             continue;
         }
 
-        state_buffer_size_req = (int)ceil((double)((++cell_count)*most_sign_bit_pos)/8);
+        cells_size_req = (int)ceil((double)((++cell_count)*most_sign_bit_pos)/8);
 
-        if( state_buffer_size < state_buffer_size_req )
+        if( cells_size < cells_size_req )
         {
-            state_buffer_re = realloc( state_buffer, state_buffer_size_req );
-            assert(state_buffer_re);
-            state_buffer_size = state_buffer_size_req;
-            state_buffer = state_buffer_re;
+            cells_re = realloc( cells, cells_size_req );
+            assert(cells_re);
+            cells_size = cells_size_req;
+            cells = cells_re;
         }
 
         color_index = NULL;
@@ -87,34 +84,29 @@ m3_state_save( const struct m3_options* options,
         assert( color_index );
 
 
-        state_buffer[state_buffer_size-1] = ( state_buffer[state_buffer_size-1] << most_sign_bit_pos ) | *color_index;
-
-        // m3_print_bits(state_buffer[state_buffer_size-1]);
-        // printf("\n");
+        cells[cells_size-1] = ( cells[cells_size-1] << most_sign_bit_pos ) | *color_index;
 
         cell_current = cell_current->next;
     } // while
 
-    state_buffer_size_req = sizeof( options->seed ) +
-                            sizeof( options->columns ) +
-                            state_buffer_size;
+    *state_size = sizeof( options->seed ) +
+                  sizeof( options->columns ) +
+                  cells_size;
 
-    state_buffer_re = realloc( state_buffer, state_buffer_size_req );
-    assert(state_buffer_re);
-    state_buffer_size = state_buffer_size_req;
-    state_buffer = state_buffer_re;
+    *state = malloc( *state_size );
+    assert( *state );
 
-    state_buffer = state_buffer >> (sizeof( options->columns )*8);
-    *state_buffer = options->columns;
+    memcpy( *state,
+            &options->seed,
+            sizeof( options->seed ) );
 
+    memcpy( *state + sizeof( options->seed ),
+            &options->columns,
+            sizeof( options->columns ) );
 
-    for(int i = 0; i < state_buffer_size; i++)
-    {
-        m3_print_bits(state_buffer[i]);
-        printf(" ");
-    }
-        printf("\n");
+    memcpy( *state + sizeof( options->seed ) + sizeof( options->columns ),
+            cells,
+            cells_size );
 
-
-
+    free( cells );
 }

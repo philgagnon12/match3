@@ -122,6 +122,16 @@ m3_print_board_info( const struct m3_cell cell )
 }
 
 void
+m3_print_hex( const uint8_t* bytes,
+              int            bytes_count )
+{
+    for(int i = 0; i < bytes_count; i++ )
+    {
+        printf("%02hhX", bytes[i] );
+    }
+}
+
+void
 m3_print_bits( const uint8_t byte )
 {
     for( uint8_t i = 0x80; i != 0; i = i >> 1 )

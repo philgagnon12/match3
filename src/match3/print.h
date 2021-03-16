@@ -20,6 +20,9 @@ void
 m3_print_board_info( const struct m3_cell cell );
 
 void
+m3_print_hex( const uint8_t* bytes,
+              int            bytes_count );
+void
 m3_print_bits( const uint8_t byte );
 
 #ifdef __cplusplus
