@@ -152,9 +152,19 @@ main( int argc, char* argv[] )
                    &state,
                    &state_size );
 
+    struct m3_cell* board_loaded = NULL;
+    m3_state_load( state,
+                   state_size,
+                   &options,
+                   &board_loaded );
+
+    m3_print_board( *board_loaded);
+    printf("\n");
+
     printf("seed %d\n", options.seed );
 
     m3_board_destroy( board );
+    m3_board_destroy( board_loaded );
     printf("done\n");
 
     return 0;
