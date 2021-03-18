@@ -141,34 +141,26 @@ void
 m3_match_either_cell( const struct m3_options* options,
                       const struct m3_cell*    cell_a,
                       const struct m3_cell*    cell_b,
-                      struct m3_match_result*  match_result,
-                      const struct m3_cell**   cell_a_or_b)
+                      struct m3_match_result*  cell_a_match_result,
+                      struct m3_match_result*  cell_b_match_result )
 {
     assert( options );
     assert( cell_a );
     assert( cell_b );
-    assert( match_result );
-    // cell_a_or_b optional
+    assert( cell_a_match_result );
+    assert( cell_b_match_result );
 
-    const struct m3_cell* cells[] = {
-        cell_a,
-        cell_b
+    const void* cells_w_match_results[][2] = {
+        { cell_a, cell_a_match_result },
+        { cell_b, cell_b_match_result }
     };
 
-    for(uint8_t i = 0; i < (uint8_t)(sizeof(cells) / sizeof(struct m3_cell*)); i++)
+
+    for(uint8_t i = 0; i < (uint8_t)((sizeof(cells_w_match_results) / sizeof(void*)))/2; i++)
     {
         m3_match_cell( options,
-                       cells[i],
-                       match_result );
-
-        if( match_result->matched_count >= options->matches_required_to_clear )
-        {
-            if( cell_a_or_b != NULL )
-            {
-                *cell_a_or_b = cells[i];
-            }
-            break;
-        }
+                       (const struct m3_cell*)cells_w_match_results[i][0],
+                       (struct m3_match_result*)cells_w_match_results[i][1] );
     }
 }
 
@@ -348,7 +340,13 @@ m3_match_help( const struct m3_options*      options,
     struct m3_cell* subject         = NULL;
     struct m3_cell* target          = NULL;
 
-    struct m3_match_result    match_result = M3_MATCH_RESULT_CONST;
+    struct m3_match_result    match_result_subject = M3_MATCH_RESULT_CONST;
+    struct m3_match_result    match_result_target  = M3_MATCH_RESULT_CONST;
+
+    struct m3_match_result* const match_results[] = {
+        &match_result_subject,
+        &match_result_target
+    };
 
     static m3_swap_routine* swap_routines[] = {
         &m3_swap_top,
@@ -376,17 +374,28 @@ m3_match_help( const struct m3_options*      options,
                     m3_match_either_cell( options,
                                           subject,
                                           target,
-                                          &match_result,
-                                          &match_help_result->swap_match );
+                                          &match_result_subject,
+                                          &match_result_target );
 
                     swap_routines[i]( &subject, &target );
+
+                    for( uint8_t m = 0; m < sizeof(match_results) / sizeof(struct m3_match_result*); m++)
+                    {
+                        if( match_results[m]->matched_count >= options->matches_required_to_clear )
+                        {
+                            match_help_result->swap_match = match_results[m]->matched[0];
+                        }
+                    }
 
                     if( match_help_result->swap_match != NULL )
                     {
                         match_help_result->swap_subject   = subject;
                         match_help_result->swap_target    = target;
 
-                        m3_match_result_destroy(&match_result);
+                        for( uint8_t m = 0; m < sizeof(match_results) / sizeof(struct m3_match_result*); m++)
+                        {
+                            m3_match_result_destroy(match_results[m]);
+                        }
                         return;
                     }
 
@@ -397,8 +406,10 @@ m3_match_help( const struct m3_options*      options,
         cell_current = cell_current->next;
     } // while
 
-    m3_match_result_destroy(&match_result);
-
+    for( uint8_t m = 0; m < sizeof(match_results) / sizeof(struct m3_match_result*); m++)
+    {
+        m3_match_result_destroy(match_results[m]);
+    }
 }
 
 int

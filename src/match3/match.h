@@ -71,13 +71,14 @@ m3_match_cell( const struct m3_options* options,
                const struct m3_cell*    cell,
                struct m3_match_result*  match_result );
 
-// will try to do a match on cell_a if no match will try cell_b 
+// will try to do a match on cell_a and a match on cell_b
+// to use after a swap()
 void
 m3_match_either_cell( const struct m3_options* options,
                       const struct m3_cell*    cell_a,
                       const struct m3_cell*    cell_b,
-                      struct m3_match_result*  match_result,
-                      const struct m3_cell**   cell_a_or_b);
+                      struct m3_match_result*  cell_a_match_result,
+                      struct m3_match_result*  cell_b_match_result );
 
 void
 m3_match_vertical( const struct m3_options* options,
