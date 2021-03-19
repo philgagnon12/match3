@@ -163,10 +163,13 @@ main( int argc, char* argv[] )
     m3_print_board( *board_loaded);
     printf("\n");
 
-    printf("seed %d\n", options.seed );
 
     m3_board_destroy( board );
     m3_board_destroy( board_loaded );
+    m3_options_destroy( &options );
+    m3_options_destroy( options_loaded );
+
+    printf("seed %d\n", seed );
     printf("done\n");
 
     return 0;

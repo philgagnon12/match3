@@ -28,20 +28,7 @@ m3_state_save( const struct m3_options* options,
 
     const struct m3_cell* cell_current = board;
 
-    if( options->seed == 0 )
-        ret = 1;
-
-    if( options->columns == 0 )
-        ret = 1;
-
-    if( options->rows == 0 )
-        ret = 1;
-
-    if( options->matches_required_to_clear < 2 )
-        ret = 1;
-
-    // Need at least 5 colors
-    if( options->colors_size < sizeof( *options->colors ) * 5 )
+    if( m3_options_are_valid( options ) != 0 )
         ret = 1;
 
     if( ret == 0 )
@@ -88,18 +75,11 @@ m3_state_save( const struct m3_options* options,
 
     for(int i = 0; ret == 0 && i < colors_count; i++)
     {
-        // Check that color has color flag
-        if( (options->colors[i] & m3_cell_flag_color) != m3_cell_flag_color )
-            ret = 1;
+        memcpy( state_offset,
+                &options->colors[i],
+                sizeof( options->colors[i] ) );
 
-        if( ret == 0 )
-        {
-            memcpy( state_offset,
-                    &options->colors[i],
-                    sizeof( options->colors[i] ) );
-
-            state_offset += sizeof( options->colors[i] );
-        }
+        state_offset += sizeof( options->colors[i] );
     }
 
     while( ret == 0 && cell_current != NULL )
@@ -153,6 +133,15 @@ m3_state_save( const struct m3_options* options,
     return ret;
 }
 
+static
+void
+options_destroy( struct m3_options* options )
+{
+    assert(options);
+    free(options->colors);
+    free(options);
+}
+
 int
 m3_state_load( char*                state,
                int                  state_size,
@@ -171,6 +160,7 @@ m3_state_load( char*                state,
 
     *options = malloc( sizeof(**options) );
     assert(*options);
+    (*options)->destroy = &options_destroy;
 
     if( state_size < sizeof((*options)->seed) )
         ret = 1;
@@ -185,14 +175,6 @@ m3_state_load( char*                state,
         state += sizeof((*options)->seed);
         state_size -= sizeof((*options)->seed);
 
-
-        // Dont allow a seed to be 0
-        if( (*options)->seed == 0 )
-            ret = 1;
-    }
-
-    if( ret == 0 )
-    {
         if( state_size < sizeof((*options)->columns) )
             ret = 1;
     }
@@ -206,13 +188,6 @@ m3_state_load( char*                state,
         state += sizeof((*options)->columns);
         state_size -= sizeof((*options)->columns);
 
-        // Dont allow columns to be 0
-        if( (*options)->columns == 0 )
-            ret = 1;
-    }
-
-    if( ret == 0 )
-    {
         if( state_size < sizeof((*options)->rows) )
             ret = 1;
     }
@@ -226,13 +201,6 @@ m3_state_load( char*                state,
         state += sizeof((*options)->rows);
         state_size -= sizeof((*options)->rows);
 
-        // Dont allow rows to be 0
-        if( (*options)->rows == 0 )
-            ret = 1;
-    }
-
-    if( ret == 0 )
-    {
         if( state_size < sizeof((*options)->matches_required_to_clear) )
             ret = 1;
     }
@@ -246,13 +214,6 @@ m3_state_load( char*                state,
         state += sizeof((*options)->matches_required_to_clear);
         state_size -= sizeof((*options)->matches_required_to_clear);
 
-        // matches_required_to_clear has to be at least 2
-        if( (*options)->matches_required_to_clear < 2 )
-            ret = 1;
-    }
-
-    if( ret == 0 )
-    {
         if( state_size < sizeof((*options)->colors_size) )
             ret = 1;
     }
@@ -265,38 +226,37 @@ m3_state_load( char*                state,
 
         state += sizeof((*options)->colors_size);
         state_size -= sizeof((*options)->colors_size);
-
-        // Check that we anticipate at least 5 color
-        if( (*options)->colors_size < sizeof(*((*options)->colors)) * 5 )
-            ret = 1;
     }
 
     if( ret == 0 )
     {
         (*options)->colors = malloc((*options)->colors_size);
-        assert((*options)->colors);
 
-        for(int i = 0; ret == 0 && i < (int)((*options)->colors_size / sizeof(*((*options)->colors))); i++)
+        if( (*options)->colors == NULL )
+            ret = 1;
+    }
+
+    for(int i = 0; ret == 0 && i < (int)((*options)->colors_size / sizeof(*((*options)->colors))); i++)
+    {
+        if( state_size < sizeof(*((*options)->colors)) )
+            ret = 1;
+
+        if( ret == 0 )
         {
-            if( state_size < sizeof(*((*options)->colors)) )
-                ret = 1;
+            memcpy( &((*options)->colors[i]),
+                    state,
+                    sizeof(*((*options)->colors)));
 
-            if( ret == 0 )
-            {
-                memcpy( &((*options)->colors[i]),
-                        state,
-                        sizeof(*((*options)->colors)));
-
-                state += sizeof(*((*options)->colors));
-                state_size -= sizeof(*((*options)->colors));
-
-                // Check that the colors have the color flag
-                if( ((*options)->colors[i] & m3_cell_flag_color) != m3_cell_flag_color )
-                    ret = 1;
-            }
+            state += sizeof(*((*options)->colors));
+            state_size -= sizeof(*((*options)->colors));
         }
     }
 
+    if( ret == 0 )
+    {
+        if( m3_options_are_valid( *options ) != 0 )
+            ret = 1;
+    }
 
     if( ret == 0 )
     {

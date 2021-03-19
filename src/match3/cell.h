@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "match3/match3.h"
+#include "match3/options.h"
 #include "match3/match.h"
 
 

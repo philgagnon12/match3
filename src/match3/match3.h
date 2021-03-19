@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#define OPTIONAL
+
 enum m3_cell_flags {
     m3_cell_flag_wall              = (1 << 7),
     m3_cell_flag_wall_undefined    = (0 << 0),
@@ -27,24 +29,5 @@ enum m3_cell_colors {
     m3_cell_color_yellow    = ( m3_cell_flag_color | 4 ) & m3_cell_mask_color,
     m3_cell_color_purple    = ( m3_cell_flag_color | 5 ) & m3_cell_mask_color
 };
-
-
-struct m3_options {
-    int                 seed;
-    uint8_t             columns;
-    uint8_t             rows;
-    uint8_t             matches_required_to_clear;
-    uint8_t*            colors;
-    size_t              colors_size;
-};
-
-#define M3_OPTIONS_CONST { \
-    0,      \
-    10,     \
-    6,      \
-    3,      \
-    NULL,   \
-    0       \
-}
 
 struct m3_cell;

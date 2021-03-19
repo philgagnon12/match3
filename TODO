@@ -1,10 +1,5 @@
 * shuffling board has to get smart either quit after a certain number of iterations or just plain better. atm a process can hang while trying to shuffle forever
 
-* options_create() with a var_arg at the end for colors
-then options_destroy()
-
-* options_are_valid()
-
 * print_options()
 
 * board_is_identical()

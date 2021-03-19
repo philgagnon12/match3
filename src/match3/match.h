@@ -1,6 +1,7 @@
 #pragma once
 
 #include "match3/match3.h"
+#include "match3/options.h"
 
 
 struct m3_match_result
