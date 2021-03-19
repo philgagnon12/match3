@@ -1,6 +1,5 @@
 
-add_executable( match3
-    match3.c
+add_library( match3
     match.c
     swap.c
     cell.c

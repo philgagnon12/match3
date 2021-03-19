@@ -37,7 +37,7 @@ m3_state_save( const struct m3_options* options,
                       sizeof( options->columns ) +
                       sizeof( options->rows ) +
                       sizeof( options->matches_required_to_clear ) +
-                      sizeof( options->colors_size) +
+                      sizeof( options->colors_size ) +
                       options->colors_size;
 
         *state = state_offset = malloc( *state_size );
