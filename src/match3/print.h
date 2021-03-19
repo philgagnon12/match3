@@ -25,6 +25,9 @@ m3_print_hex( const uint8_t* bytes,
 void
 m3_print_bits( const uint8_t byte );
 
+void
+m3_print_options( const struct m3_options* options );
+
 #ifdef __cplusplus
 }
 #endif

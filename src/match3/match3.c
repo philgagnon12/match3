@@ -64,10 +64,6 @@ main( int argc, char* argv[] )
         rows = atoi( argv[3] );
     }
 
-    printf("seed %d\n", seed );
-    printf("columns %d\n", columns );
-    printf("rows %d\n", rows );
-
     uint8_t colors[] = {
         m3_cell_color_red,
         m3_cell_color_green,
@@ -85,6 +81,8 @@ main( int argc, char* argv[] )
     options.colors                      = colors;
     options.colors_size                 = sizeof( colors );
 
+    m3_print_options(&options);
+    printf("\n");
 
     struct m3_cell* board = NULL;
 
@@ -163,6 +161,7 @@ main( int argc, char* argv[] )
     m3_print_board( *board_loaded);
     printf("\n");
 
+    m3_print_options(options_loaded);
 
     m3_board_destroy( board );
     m3_board_destroy( board_loaded );
