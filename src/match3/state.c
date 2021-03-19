@@ -8,6 +8,8 @@
 #include "match3/cell.h"
 #include "match3/board.h"
 
+// TODO state_save & load destroy
+
 void
 m3_state_save( const struct m3_options* options,
                const struct m3_cell*    board,
@@ -110,6 +112,169 @@ m3_state_save( const struct m3_options* options,
             cells_size );
 
     free( cells );
+}
+
+void
+m3_state_save_2( const struct m3_options* options,
+               const struct m3_cell*    board,
+               char**                   state,
+               int*                     state_size )
+{
+    assert( options );
+    assert( board );
+    assert( state );
+    assert( state_size );
+
+    char* state_offset = NULL;
+    char* state_re = NULL;
+
+    const int colors_count = options->colors_size / sizeof( *options->colors );
+
+    const struct m3_cell* cell_current = board;
+
+    *state_size = sizeof( options->seed ) +
+                  sizeof( options->columns ) +
+                  sizeof( options->rows ) +
+                  sizeof( options->colors_size) +
+                  options->colors_size;
+
+    *state = state_offset = malloc( *state_size );
+
+    memcpy( state_offset,
+            &options->seed,
+            sizeof( options->seed ) );
+
+    state_offset += sizeof( options->seed );
+
+    memcpy( state_offset,
+            &options->columns,
+            sizeof( options->columns ) );
+
+    state_offset += sizeof( options->columns );
+
+    memcpy( state_offset,
+            &options->rows,
+            sizeof( options->rows ) );
+
+    state_offset += sizeof( options->rows );
+
+    memcpy( state_offset,
+            &options->colors_size,
+            sizeof( options->colors_size ) );
+
+    state_offset += sizeof( options->colors_size );
+
+    for(int i = 0; i < colors_count; i++)
+    {
+        memcpy( state_offset,
+                &options->colors[i],
+                sizeof( options->colors[i] ) );
+
+        state_offset += sizeof( options->colors[i] );
+    }
+
+    while( cell_current != NULL )
+    {
+        if( ( cell_current->category & m3_cell_flag_color ) != m3_cell_flag_color )
+        {
+            cell_current = cell_current->next;
+            continue;
+        }
+
+        state_re = realloc(*state, *state_size + sizeof(cell_current->category));
+        assert(state_re);
+        *state = state_offset = state_re;
+
+        state_offset += *state_size;
+
+        memcpy( state_offset,
+                &cell_current->category,
+                sizeof(cell_current->category) );
+
+        *state_size += sizeof(cell_current->category);
+
+        cell_current = cell_current->next;
+    }
+
+}
+
+// TODO options will need a destroy when 
+// state_load_destroy
+// TODO validationwith state_size for every field
+void
+m3_state_load_2( char*              state,
+               int                state_size,
+               struct m3_options** options,
+               struct m3_cell**   board )
+{
+    assert(state);
+    assert(options);
+    assert(board);
+
+    struct m3_cell* cell_current = NULL;
+
+    int cell_index = 0;
+
+    *options = malloc( sizeof(**options) );
+    assert(*options);
+
+    memcpy( &(*options)->seed,
+            state,
+            sizeof((*options)->seed) );
+
+    state += sizeof((*options)->seed);
+
+    memcpy( &(*options)->columns,
+            state,
+            sizeof((*options)->columns) );
+
+    state += sizeof((*options)->columns);
+
+    memcpy( &(*options)->rows,
+            state,
+            sizeof((*options)->rows) );
+
+    state += sizeof((*options)->rows);
+
+    memcpy( &(*options)->colors_size,
+            state,
+            sizeof((*options)->colors_size) );
+
+    state += sizeof((*options)->colors_size);
+
+    (*options)->colors = malloc((*options)->colors_size);
+    assert((*options)->colors);
+
+    for(int i = 0; i < (int)((*options)->colors_size / sizeof(*((*options)->colors))); i++)
+    {
+        memcpy( &((*options)->colors[i]),
+                state,
+                sizeof(*((*options)->colors)));
+        
+        state += sizeof(*((*options)->colors));
+    }
+
+
+
+    m3_board_build(*options, board);
+    assert(board);
+
+    cell_current = *board;
+
+    while( cell_current != NULL )
+    {
+        if( ( cell_current->category & m3_cell_flag_color ) != m3_cell_flag_color )
+        {
+            cell_current = cell_current->next;
+            continue;
+        }
+
+        cell_current->category = (uint8_t)state[cell_index];
+        cell_index++;
+
+        cell_current = cell_current->next;
+    }
+
 }
 
 void
