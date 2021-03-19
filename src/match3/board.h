@@ -23,6 +23,9 @@ m3_board_shuffle( struct m3_options* options,
 void
 m3_board_destroy( struct m3_cell* board );
 
+unsigned int
+m3_board_are_identical( const struct m3_cell* board_a,
+                        const struct m3_cell* board_b );
 #ifdef __cplusplus
 }
 #endif

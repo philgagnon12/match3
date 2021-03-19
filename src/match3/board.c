@@ -223,3 +223,40 @@ m3_board_destroy( struct m3_cell* board )
 
     free( board );
 }
+
+// Return 0 when identical
+unsigned int
+m3_board_are_identical( const struct m3_cell* board_a,
+                        const struct m3_cell* board_b )
+{
+    assert(board_a);
+    assert(board_b);
+
+    const struct m3_cell* cell_current_a = board_a;
+    const struct m3_cell* cell_current_b = board_b;
+
+    unsigned int differences = 0;
+
+    while( cell_current_a != NULL || cell_current_b != NULL )
+    {
+        if( cell_current_a != NULL && cell_current_b != NULL )
+        {
+            if( cell_current_a->category != cell_current_b->category )
+                differences++;
+        }
+
+        if( cell_current_a != NULL && cell_current_b == NULL )
+                differences++;
+
+        if( cell_current_b != NULL && cell_current_a == NULL )
+                differences++;
+
+        if( cell_current_a != NULL )
+            cell_current_a = cell_current_a->next;
+
+        if( cell_current_b != NULL )
+            cell_current_b = cell_current_b->next;
+    }
+
+    return differences;
+}
