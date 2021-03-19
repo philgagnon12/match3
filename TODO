@@ -1,10 +1,11 @@
 * shuffling board has to get smart either quit after a certain number of iterations or just plain better. atm a process can hang while trying to shuffle forever
 
-* match_either_cell has to allow for 6 matches ex:
-x0
-x0
-0x
+* options_create() with a var_arg at the end for colors
+then options_destroy()
 
-or 2 match_results
+* options_are_valid()
 
-* make state save and load simpler
+* print_options()
+
+* board_is_identical()
+... would it care to compare options too ? should be just board compare not options i think
