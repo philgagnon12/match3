@@ -1,4 +1,4 @@
 * shuffling board has to get smart either quit after a certain number of iterations or just plain better. atm a process can hang while trying to shuffle forever
 
-* extract sample board builder into a board_parse("--rows 2 1 1 1 2 2 2") kind of thing 
-* that way it'll be cleaner for my tests
+* have state_save output a struct that has a destroy() member
+ state struct ... state_size should be size_t not int

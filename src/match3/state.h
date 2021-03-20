@@ -8,12 +8,14 @@
 extern "C" {
 #endif
 
+// Return zero on success
 int
 m3_state_save( const struct m3_options* options,
                const struct m3_cell*    board,
                char**                   state,
                int*                     state_size );
 
+// Return zero on success
 int
 m3_state_load( char*                state,
                int                  state_size,

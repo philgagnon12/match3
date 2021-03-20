@@ -60,6 +60,7 @@ main( void )
 
     m3_board_destroy( board_a );
     m3_board_destroy( board_b );
+    m3_options_destroy(&options);
 
     return 0;
 }

@@ -8,6 +8,7 @@
 #include "match3/cell.h"
 #include "match3/board.h"
 
+// Return zero on success
 int
 m3_state_save( const struct m3_options* options,
                const struct m3_cell*    board,
@@ -142,6 +143,7 @@ options_destroy( struct m3_options* options )
     free(options);
 }
 
+// Return zero on success
 int
 m3_state_load( char*                state,
                int                  state_size,
