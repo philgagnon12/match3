@@ -32,13 +32,11 @@ main(void)
     m3_board_build(&options, &board_to_save);
     m3_board_rand(&options, board_to_save);
 
-    char* save_state = NULL;
-    size_t save_state_size = 0;
+    struct m3_state save_state = M3_STATE_CONST;
 
     assert( 0 == m3_state_save( &options,
                                 board_to_save,
-                                &save_state,
-                                &save_state_size ) );
+                                &save_state ) );
 
     m3_board_destroy( board_to_save );
     m3_options_destroy(&options);
@@ -47,13 +45,12 @@ main(void)
     struct m3_cell* board_loaded = NULL;
 
 
-    assert( 0 == m3_state_load( save_state,
-                                save_state_size,
+    assert( 0 == m3_state_load( &save_state,
                                 &options_loaded,
                                 &board_loaded ) );
 
 
-    free(save_state); // TODO remove in favor of m3_state_destroy()
+    m3_state_destroy(&save_state);
     m3_board_destroy( board_loaded );
     m3_options_destroy(options_loaded);
 

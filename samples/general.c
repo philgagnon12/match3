@@ -142,21 +142,20 @@ main( int argc, char* argv[] )
         printf("\n");
     }
 
-    char* state = NULL;
-    int state_size = 0;
+    struct m3_state state = M3_STATE_CONST;
 
     assert( 0 == m3_state_save( &options,
                                 board,
-                                &state,
-                                &state_size ) );
+                                &state ) );
 
     struct m3_cell* board_loaded = NULL;
     struct m3_options* options_loaded = NULL;
 
-    assert( 0 == m3_state_load( state,
-                                state_size,
+    assert( 0 == m3_state_load( &state,
                                 &options_loaded,
                                 &board_loaded ) );
+
+    m3_state_destroy(&state);
 
     m3_print_board( *board_loaded);
     printf("\n");

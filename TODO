@@ -1,4 +1,3 @@
 * shuffling board has to get smart either quit after a certain number of iterations or just plain better. atm a process can hang while trying to shuffle forever
 
-* have state_save output a struct that has a destroy() member
- state struct ... state_size should be size_t not int
+* struct m3_cell have a member destroy()

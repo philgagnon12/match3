@@ -5,20 +5,42 @@
 #include <assert.h>
 
 #include "match3/match3.h"
+#include "match3/state.h"
 #include "match3/cell.h"
 #include "match3/board.h"
+
+void
+m3_state_destroy( struct m3_state* state )
+{
+    assert(state);
+
+    if(state->destroy != NULL)
+    {
+        state->destroy(state);
+    }
+}
+
+static
+void
+state_destroy( struct m3_state* state )
+{
+    assert(state);
+
+    if(state->buffer != NULL)
+    {
+        free(state->buffer);
+    }
+}
 
 // Return zero on success
 int
 m3_state_save( const struct m3_options* options,
                const struct m3_cell*    board,
-               char**                   state,
-               int*                     state_size )
+               struct m3_state*         state )
 {
     assert( options );
     assert( board );
     assert( state );
-    assert( state_size );
 
     int ret = 0;
 
@@ -34,14 +56,16 @@ m3_state_save( const struct m3_options* options,
 
     if( ret == 0 )
     {
-        *state_size = sizeof( options->seed ) +
-                      sizeof( options->columns ) +
-                      sizeof( options->rows ) +
-                      sizeof( options->matches_required_to_clear ) +
-                      sizeof( options->colors_size ) +
-                      options->colors_size;
+        state->destroy = &state_destroy;
 
-        *state = state_offset = malloc( *state_size );
+        state->buffer_size = sizeof( options->seed ) +
+                             sizeof( options->columns ) +
+                             sizeof( options->rows ) +
+                             sizeof( options->matches_required_to_clear ) +
+                             sizeof( options->colors_size ) +
+                             options->colors_size;
+
+        state->buffer = state_offset = malloc( state->buffer_size );
 
         memcpy( state_offset,
                 &options->seed,
@@ -106,17 +130,17 @@ m3_state_save( const struct m3_options* options,
 
         if( ret == 0 )
         {
-            state_re = realloc(*state, *state_size + sizeof(cell_current->category));
+            state_re = realloc(state->buffer, state->buffer_size + sizeof(cell_current->category));
             assert(state_re);
-            *state = state_offset = state_re;
+            state->buffer = state_offset = state_re;
 
-            state_offset += *state_size;
+            state_offset += state->buffer_size;
 
             memcpy( state_offset,
                     &cell_current->category,
                     sizeof(cell_current->category) );
 
-            *state_size += sizeof(cell_current->category);
+            state->buffer_size += sizeof(cell_current->category);
 
             cell_current = cell_current->next;
         }
@@ -124,10 +148,9 @@ m3_state_save( const struct m3_options* options,
 
     if( ret != 0 )
     {
-        if( *state != NULL )
+        if( state != NULL )
         {
-            free(*state);
-            *state = NULL;
+            m3_state_destroy(state);
         }
     }
 
@@ -139,22 +162,29 @@ void
 options_destroy( struct m3_options* options )
 {
     assert(options);
-    free((uint8_t*)options->colors);
+
+    if(options->colors != NULL)
+    {
+        free((uint8_t*)options->colors);
+    }
+
     free(options);
 }
 
 // Return zero on success
 int
-m3_state_load( char*                state,
-               int                  state_size,
-               struct m3_options**  options,
-               struct m3_cell**     board )
+m3_state_load( const struct m3_state*   state,
+               struct m3_options**      options,
+               struct m3_cell**         board )
 {
     assert(state);
     assert(options);
     assert(board);
 
     int ret = 0;
+
+    char* state_buffer = (char*)state->buffer;
+    size_t state_buffer_size = state->buffer_size;
 
     struct m3_cell* cell_current = NULL;
 
@@ -164,70 +194,70 @@ m3_state_load( char*                state,
     assert(*options);
     (*options)->destroy = &options_destroy;
 
-    if( state_size < sizeof((*options)->seed) )
+    if( state_buffer_size < sizeof((*options)->seed) )
         ret = 1;
 
 
     if( ret == 0 )
     {
         memcpy( &(*options)->seed,
-                state,
+                state_buffer,
                 sizeof((*options)->seed) );
 
-        state += sizeof((*options)->seed);
-        state_size -= sizeof((*options)->seed);
+        state_buffer += sizeof((*options)->seed);
+        state_buffer_size -= sizeof((*options)->seed);
 
-        if( state_size < sizeof((*options)->columns) )
+        if( state_buffer_size < sizeof((*options)->columns) )
             ret = 1;
     }
 
     if( ret == 0 )
     {
         memcpy( &(*options)->columns,
-                state,
+                state_buffer,
                 sizeof((*options)->columns) );
 
-        state += sizeof((*options)->columns);
-        state_size -= sizeof((*options)->columns);
+        state_buffer += sizeof((*options)->columns);
+        state_buffer_size -= sizeof((*options)->columns);
 
-        if( state_size < sizeof((*options)->rows) )
+        if( state_buffer_size < sizeof((*options)->rows) )
             ret = 1;
     }
 
     if( ret == 0 )
     {
         memcpy( &(*options)->rows,
-                state,
+                state_buffer,
                 sizeof((*options)->rows) );
 
-        state += sizeof((*options)->rows);
-        state_size -= sizeof((*options)->rows);
+        state_buffer += sizeof((*options)->rows);
+        state_buffer_size -= sizeof((*options)->rows);
 
-        if( state_size < sizeof((*options)->matches_required_to_clear) )
+        if( state_buffer_size < sizeof((*options)->matches_required_to_clear) )
             ret = 1;
     }
 
     if( ret == 0 )
     {
         memcpy( &(*options)->matches_required_to_clear,
-                state,
+                state_buffer,
                 sizeof((*options)->matches_required_to_clear) );
 
-        state += sizeof((*options)->matches_required_to_clear);
-        state_size -= sizeof((*options)->matches_required_to_clear);
+        state_buffer += sizeof((*options)->matches_required_to_clear);
+        state_buffer_size -= sizeof((*options)->matches_required_to_clear);
 
-        if( state_size < sizeof((*options)->colors_size) )
+        if( state_buffer_size < sizeof((*options)->colors_size) )
             ret = 1;
     }
 
     if( ret == 0 )
     {
         memcpy( &(*options)->colors_size,
-                state,
+                state_buffer,
                 sizeof((*options)->colors_size) );
 
-        state += sizeof((*options)->colors_size);
-        state_size -= sizeof((*options)->colors_size);
+        state_buffer += sizeof((*options)->colors_size);
+        state_buffer_size -= sizeof((*options)->colors_size);
     }
 
     if( ret == 0 )
@@ -240,17 +270,17 @@ m3_state_load( char*                state,
 
     for(int i = 0; ret == 0 && i < (int)((*options)->colors_size / sizeof(*((*options)->colors))); i++)
     {
-        if( state_size < sizeof(*((*options)->colors)) )
+        if( state_buffer_size < sizeof(*((*options)->colors)) )
             ret = 1;
 
         if( ret == 0 )
         {
             memcpy( (uint8_t*)(&((*options)->colors[i])),
-                    state,
+                    state_buffer,
                     sizeof(*((*options)->colors)));
 
-            state += sizeof(*((*options)->colors));
-            state_size -= sizeof(*((*options)->colors));
+            state_buffer += sizeof(*((*options)->colors));
+            state_buffer_size -= sizeof(*((*options)->colors));
         }
     }
 
@@ -262,8 +292,8 @@ m3_state_load( char*                state,
 
     if( ret == 0 )
     {
-        // Check that our given columns and rows gives us the amount of cells from the state_size that remains
-        if( state_size < (*options)->columns * (*options)->rows )
+        // Check that our given columns and rows gives us the amount of cells from the state_buffer_size that remains
+        if( state_buffer_size < (size_t)((*options)->columns * (*options)->rows) )
             ret = 1;
     }
 
@@ -283,7 +313,7 @@ m3_state_load( char*                state,
             continue;
         }
 
-        cell_current->category = (uint8_t)state[cell_index];
+        cell_current->category = (uint8_t)state_buffer[cell_index];
         cell_index++;
 
         // Check that the color is one of the defined ones
@@ -314,10 +344,7 @@ m3_state_load( char*                state,
         }
         if( *options != NULL )
         {
-            if((*options)->colors != NULL )
-                free((uint8_t*)(*options)->colors);
-
-            free(*options);
+            m3_options_destroy(*options);
             *options = NULL;
         }
     }

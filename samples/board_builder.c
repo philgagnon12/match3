@@ -126,18 +126,18 @@ main( int argc, char* argv[] )
     {
         m3_print_board( *board );
 
-        char* state = NULL;
-        int state_size = 0;
+        struct m3_state state = M3_STATE_CONST;
 
         assert( 0 == m3_state_save( &options,
                                     board,
-                                    &state,
-                                    &state_size ) );
+                                    &state ) );
 
         // ./board_builder --rows 2 1 1 1 2 2 2 | tail -n 1 | xxd -r -p | xxd -i -c 8
         printf("m3_state_load():\n");
-        m3_print_hex((const uint8_t*)state, state_size);
+        m3_print_hex((const uint8_t*)state.buffer, state.buffer_size);
         printf("\n");
+
+        m3_state_destroy(&state);
     }
 
     if( board != NULL )
