@@ -138,7 +138,7 @@ void
 options_destroy( struct m3_options* options )
 {
     assert(options);
-    free(options->colors);
+    free((uint8_t*)options->colors);
     free(options);
 }
 
@@ -243,7 +243,7 @@ m3_state_load( char*                state,
 
         if( ret == 0 )
         {
-            memcpy( &((*options)->colors[i]),
+            memcpy( (uint8_t*)(&((*options)->colors[i])),
                     state,
                     sizeof(*((*options)->colors)));
 
@@ -313,7 +313,7 @@ m3_state_load( char*                state,
         if( *options != NULL )
         {
             if((*options)->colors != NULL )
-                free((*options)->colors);
+                free((uint8_t*)(*options)->colors);
 
             free(*options);
             *options = NULL;

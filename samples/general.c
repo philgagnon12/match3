@@ -64,7 +64,7 @@ main( int argc, char* argv[] )
         rows = atoi( argv[3] );
     }
 
-    uint8_t colors[] = {
+    const uint8_t colors[] = {
         m3_cell_color_red,
         m3_cell_color_green,
         m3_cell_color_blue,

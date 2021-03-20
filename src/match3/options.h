@@ -9,7 +9,7 @@ struct m3_options {
     uint8_t             columns;
     uint8_t             rows;
     uint8_t             matches_required_to_clear;
-    uint8_t*            colors;
+    const uint8_t*      colors;
     size_t              colors_size;
     OPTIONAL void (*destroy)( struct m3_options* );
 };
@@ -31,14 +31,15 @@ extern "C" {
 void
 m3_options_destroy( struct m3_options* options );
 
+// Returns zero when valid
 int
 m3_options_are_valid( const struct m3_options* options );
 
 
 struct m3_options_find_colors_result {
-    uint8_t** colors;
-    uint32_t colors_count;
-    size_t colors_size;
+    const uint8_t** colors;
+    uint32_t        colors_count;
+    size_t          colors_size;
 };
 
 #define M3_OPTIONS_FIND_COLORS_RESULT_CONST { \
@@ -49,11 +50,11 @@ struct m3_options_find_colors_result {
 
 void
 m3_options_find_colors_result_init( struct m3_options_find_colors_result* find_colors_result,
-                                    uint8_t*                              color );
+                                    const uint8_t*                        color );
 
 void
 m3_options_find_colors_result_add( struct m3_options_find_colors_result*    find_colors_result,
-                                   uint8_t*                                 color );
+                                   const uint8_t*                           color );
 
 void
 m3_options_find_colors_result_destroy( struct m3_options_find_colors_result* find_colors_result );

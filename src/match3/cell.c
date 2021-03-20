@@ -117,7 +117,7 @@ m3_cell_star_unique( const struct m3_options* options,
         cell
     };
 
-    qsort( options->colors,
+    qsort( (uint8_t*)options->colors,
            options->colors_size / sizeof( uint8_t ),
            sizeof( uint8_t ),
            &m3_cell_star_unique_compar );
