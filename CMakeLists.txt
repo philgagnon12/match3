@@ -8,4 +8,5 @@ include( CTest )
 
 if( BUILD_TESTING )
     add_subdirectory( tests/system )
+    add_subdirectory( tests/scenarios )
 endif()

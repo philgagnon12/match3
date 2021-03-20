@@ -1,0 +1,3 @@
+add_executable( scenario_test_match_either_6_matched match_either_6_matched_scenario_test.c )
+target_link_libraries( scenario_test_match_either_6_matched match3 )
+add_test( NAME match_either_6_matched_scenario_test COMMAND scenario_test_match_either_6_matched )
