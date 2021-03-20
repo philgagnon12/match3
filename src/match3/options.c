@@ -15,6 +15,7 @@ m3_options_destroy( struct m3_options* options )
         options->destroy(options);
 }
 
+// Returns zero when valid
 int
 m3_options_are_valid( const struct m3_options* options )
 {
@@ -49,9 +50,12 @@ m3_options_are_valid( const struct m3_options* options )
 
     for(int i = 0; ret == 0 && i < colors_count; i++)
     {
-        // Check that color has color flag
-        if( (options->colors[i] & m3_cell_flag_color) != m3_cell_flag_color )
+        // Check that color has color flag and that it cannot be m3_cell_flag_color_open, its a reserved color to m3
+        if( (options->colors[i] & m3_cell_flag_color) != m3_cell_flag_color &&
+            options->colors[i] != m3_cell_flag_color )
+        {
             ret = 1;
+        }
     }
 
     return ret;

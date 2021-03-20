@@ -125,7 +125,7 @@ m3_state_save( const struct m3_options* options,
                 color_index = &i;
         }
 
-        if( color_index == NULL )
+        if( color_index == NULL && cell_current->category != (m3_cell_flag_color | m3_cell_flag_color_open))
             ret = 1;
 
         if( ret == 0 )

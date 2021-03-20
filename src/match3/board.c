@@ -308,6 +308,11 @@ m3_board_fill_columns( const struct m3_options* options,
             {
                 cell_current = cell_color_top_most->right;
                 cell_color_top_most = cell_current;
+
+				if (cell_current != NULL && (cell_current->category & m3_cell_flag_wall) == m3_cell_flag_wall)
+				{
+					cell_current = NULL;
+				}
             }
         }
         if( cell_current != NULL )
@@ -370,6 +375,11 @@ m3_board_fill_rows( const struct m3_options* options,
             {
                 cell_current = cell_color_left_most->bottom;
                 cell_color_left_most = cell_current;
+
+				if (cell_current != NULL && (cell_current->category & m3_cell_flag_wall) == m3_cell_flag_wall)
+				{
+					cell_current = NULL;
+				}
             }
         }
         if( cell_current != NULL )

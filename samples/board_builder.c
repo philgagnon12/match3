@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <assert.h>
 
 #include "match3/match3.h"
@@ -78,13 +79,13 @@ main( int argc, char* argv[] )
         if( columns != 0 )
         {
             options.columns = columns;
-            options.rows = (uint8_t)(categories_size / columns);
+            options.rows = (uint8_t)ceil((double)categories_size / (double)columns);
         }
 
         if( rows != 0 )
         {
             options.rows = rows;
-            options.columns = (uint8_t)(categories_size / rows);
+            options.columns = (uint8_t)ceil((double)categories_size / (double)rows);
         }
 
         m3_print_options( &options );
