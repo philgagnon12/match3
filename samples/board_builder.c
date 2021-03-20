@@ -43,7 +43,7 @@ main( int argc, char* argv[] )
             assert( categories_re );
             categories = categories_re;
 
-            categories[categories_size-1] = (uint8_t)strtol( argv[i], NULL, 10 );
+            categories[categories_size-1] = m3_cell_flag_color | (uint8_t)strtol( argv[i], NULL, 10 );
         }
     }
 
@@ -106,44 +106,18 @@ main( int argc, char* argv[] )
 
         if( columns != 0 )
         {
-            struct m3_cell* cell_color_top_most = board->right->bottom;
-            cell_current = cell_color_top_most;
-
-            for(int i = 0; i < categories_size; i++ )
-            {
-                if( (cell_current->category & m3_cell_flag_wall) == m3_cell_flag_wall )
-                {
-                    break;
-                }
-                cell_current->category = categories[i] | m3_cell_flag_color;
-                cell_current = cell_current->bottom;
-                if( ( cell_current->category & m3_cell_flag_wall ) == m3_cell_flag_wall )
-                {
-                    cell_current = cell_color_top_most->right;
-                    cell_color_top_most = cell_current;
-                }
-            }
+            m3_board_fill_columns( &options,
+                                   board,
+                                   categories,
+                                   categories_size );
         }
 
         if( rows != 0 )
         {
-            struct m3_cell* cell_color_left_most = board->right->bottom;
-            cell_current = cell_color_left_most;
-
-            for(int i = 0; i < categories_size; i++ )
-            {
-                if( (cell_current->category & m3_cell_flag_wall) == m3_cell_flag_wall )
-                {
-                    break;
-                }
-                cell_current->category = categories[i] | m3_cell_flag_color;
-                cell_current = cell_current->right;
-                if( ( cell_current->category & m3_cell_flag_wall ) == m3_cell_flag_wall )
-                {
-                    cell_current = cell_color_left_most->bottom;
-                    cell_color_left_most = cell_current;
-                }
-            }
+            m3_board_fill_rows( &options,
+                                board,
+                                categories,
+                                categories_size );
         }
 
     }

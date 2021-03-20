@@ -222,7 +222,7 @@ m3_print_options( const struct m3_options* options )
             if( options->colors_size > 0 &&
                 options->colors != NULL )
             {
-                for(int ii = 0;  ii < options->colors_size / sizeof(*options->colors); ii++)
+                for(int ii = 0;  ii < (int)(options->colors_size / sizeof(*options->colors)); ii++)
                 {
                     printf("      ");
                     m3_print_bits( options->colors[ii] );

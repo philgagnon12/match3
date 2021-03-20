@@ -4,8 +4,8 @@
 #include <assert.h>
 
 #include "match3/board.h"
+#include "match3/options.h"
 #include "match3/match.h"
-
 
 void
 m3_board_build( const struct m3_options*   options,
@@ -259,4 +259,128 @@ m3_board_are_identical( const struct m3_cell* board_a,
     }
 
     return differences;
+}
+
+// Assign color to cell flagged as open color, going from column to column, top to bottom
+void
+m3_board_fill_columns( const struct m3_options* options,
+                       struct m3_cell*          board,
+                       uint8_t*                 colors,
+                       size_t                   colors_size )
+{
+    assert(options);
+    assert(board);
+    assert(colors);
+
+    struct m3_options_find_colors_result find_colors_result = M3_OPTIONS_FIND_COLORS_RESULT_CONST;
+
+    uint32_t colors_count = colors_size / sizeof(*colors);
+
+    m3_options_find_colors( options,
+                            colors,
+                            colors_size,
+                            &find_colors_result );
+
+    assert(colors_count == find_colors_result.colors_count);
+
+    struct m3_cell* cell_color_top_most = NULL;
+    struct m3_cell* cell_current = board;
+
+    while( cell_current != NULL && cell_color_top_most == NULL )
+    {
+        if( (cell_current->category & m3_cell_flag_color) == m3_cell_flag_color )
+        {
+            cell_color_top_most = cell_current;
+        }
+
+        cell_current = cell_current->next;
+    }
+
+    cell_current = cell_color_top_most;
+
+    for( uint32_t c = 0; cell_current != NULL && c < find_colors_result.colors_count; c++)
+    {
+        while( cell_current != NULL && cell_current->category != (m3_cell_flag_color | m3_cell_flag_color_open))
+        {
+            cell_current = cell_current->bottom;
+
+            if( cell_current != NULL && ( cell_current->category & m3_cell_flag_wall ) == m3_cell_flag_wall )
+            {
+                cell_current = cell_color_top_most->right;
+                cell_color_top_most = cell_current;
+            }
+        }
+        if( cell_current != NULL )
+        {
+            if( cell_current->category == (m3_cell_flag_color | m3_cell_flag_color_open))
+            {
+                cell_current->category = *find_colors_result.colors[c];
+            }
+            cell_current = cell_current->bottom;
+        }
+    }
+
+    m3_options_find_colors_result_destroy(&find_colors_result);
+}
+
+// Assign color to cell flagged as open color, going from row to row, left to right
+void
+m3_board_fill_rows( const struct m3_options* options,
+                    struct m3_cell*          board,
+                    uint8_t*                 colors,
+                    size_t                   colors_size )
+{
+    assert(options);
+    assert(board);
+    assert(colors);
+
+    struct m3_options_find_colors_result find_colors_result = M3_OPTIONS_FIND_COLORS_RESULT_CONST;
+
+    uint32_t colors_count = colors_size / sizeof(*colors);
+
+    m3_options_find_colors( options,
+                            colors,
+                            colors_size,
+                            &find_colors_result );
+
+    assert(colors_count == find_colors_result.colors_count);
+
+    struct m3_cell* cell_color_left_most = NULL;
+    struct m3_cell* cell_current = board;
+
+    while( cell_current != NULL && cell_color_left_most == NULL )
+    {
+        if( (cell_current->category & m3_cell_flag_color) == m3_cell_flag_color )
+        {
+            cell_color_left_most = cell_current;
+        }
+
+        cell_current = cell_current->next;
+    }
+
+    cell_current = cell_color_left_most;
+
+    for( uint32_t c = 0; cell_current != NULL && c < find_colors_result.colors_count; c++)
+    {
+        while( cell_current != NULL && cell_current->category != (m3_cell_flag_color | m3_cell_flag_color_open))
+        {
+            cell_current = cell_current->right;
+
+            if( cell_current != NULL && ( cell_current->category & m3_cell_flag_wall ) == m3_cell_flag_wall )
+            {
+                cell_current = cell_color_left_most->bottom;
+                cell_color_left_most = cell_current;
+            }
+        }
+        if( cell_current != NULL )
+        {
+            if( cell_current->category == (m3_cell_flag_color | m3_cell_flag_color_open))
+            {
+                cell_current->category = *find_colors_result.colors[c];
+            }
+            cell_current = cell_current->right;
+        }
+    }
+
+    m3_options_find_colors_result_destroy(&find_colors_result);
 }

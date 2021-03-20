@@ -56,3 +56,93 @@ m3_options_are_valid( const struct m3_options* options )
 
     return ret;
 }
+
+void
+m3_options_find_colors_result_init( struct m3_options_find_colors_result* find_colors_result,
+                                    uint8_t*                              color )
+{
+    assert(find_colors_result);
+
+    if( find_colors_result->colors == NULL )
+    {
+        find_colors_result->colors_size = sizeof(*find_colors_result->colors);
+        find_colors_result->colors = malloc( find_colors_result->colors_size );
+        assert(find_colors_result->colors);
+    }
+
+    for( unsigned int i = 0; i < find_colors_result->colors_size / sizeof(*find_colors_result->colors); i++ )
+    {
+        find_colors_result->colors[i] = NULL;
+    }
+
+    find_colors_result->colors[0] = color;
+    find_colors_result->colors_count = 1;
+}
+
+void
+m3_options_find_colors_result_add( struct m3_options_find_colors_result*    find_colors_result,
+                                   uint8_t*                                 color )
+{
+    assert(find_colors_result);
+
+    uint8_t** colors_re = NULL;
+
+    if(find_colors_result->colors_size < sizeof(*find_colors_result->colors) * (find_colors_result->colors_count+1) )
+    {
+        find_colors_result->colors_size += sizeof(*find_colors_result->colors);
+        colors_re = realloc(find_colors_result->colors, find_colors_result->colors_size );
+        assert(colors_re);
+        find_colors_result->colors = colors_re;
+    }
+
+    find_colors_result->colors[find_colors_result->colors_count] = color;
+    find_colors_result->colors_count++;
+}
+
+void
+m3_options_find_colors_result_destroy( struct m3_options_find_colors_result* find_colors_result )
+{
+    assert(find_colors_result);
+
+    static const struct m3_options_find_colors_result find_colors_result_const = M3_OPTIONS_FIND_COLORS_RESULT_CONST;
+
+    if(find_colors_result->colors != NULL)
+    {
+        free(find_colors_result->colors);
+    }
+
+    *find_colors_result = find_colors_result_const;
+}
+
+
+void
+m3_options_find_colors( const struct m3_options*                options,
+                        uint8_t*                                colors_to_find,
+                        size_t                                  colors_to_find_size,
+                        struct m3_options_find_colors_result*   find_colors_result )
+{
+    assert(options);
+    assert(colors_to_find);
+    assert(find_colors_result);
+
+    uint8_t* first = NULL;
+
+    for(unsigned int i = 0; i < colors_to_find_size / sizeof(*colors_to_find); i++ )
+    {
+        for(uint8_t c = 0; c < options->colors_size / sizeof(*options->colors); c++)
+        {
+            if( colors_to_find[i] == options->colors[c] )
+            {
+                if( first == NULL )
+                {
+                    first = &options->colors[c];
+                    m3_options_find_colors_result_init(find_colors_result, first);
+                }
+                else
+                {
+                    m3_options_find_colors_result_add(find_colors_result, &options->colors[c]);
+                }
+            }
+        }
+    }
+}
