@@ -62,7 +62,11 @@ main( void )
 
     assert(cell_a != cell_b);
 
+    m3_match_result_destroy(&match_result_a);
+    m3_match_result_destroy(&match_result_b);
 
+    m3_board_destroy( board );
+    m3_options_destroy(&options);
     return 0;
 
 }
