@@ -96,7 +96,7 @@ m3_options_find_colors_result_add( struct m3_options_find_colors_result*    find
         find_colors_result->colors_size += sizeof(*find_colors_result->colors);
         colors_re = realloc((uint8_t*)find_colors_result->colors, find_colors_result->colors_size );
         assert(colors_re);
-        find_colors_result->colors = colors_re;
+        find_colors_result->colors = (const uint8_t**)colors_re;
     }
 
     find_colors_result->colors[find_colors_result->colors_count] = color;

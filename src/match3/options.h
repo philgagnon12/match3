@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #include "match3/match3.h"
 
 struct m3_options;
