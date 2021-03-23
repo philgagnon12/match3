@@ -6,3 +6,7 @@ add_test( NAME board_are_identical_system_test COMMAND system_test_board_are_ide
 add_executable( system_test_save_and_load save_and_load_system_test.c )
 target_link_libraries( system_test_save_and_load match3 )
 add_test( NAME save_and_load_system_test COMMAND system_test_save_and_load )
+
+add_executable( system_test_state_load_from_hex_string state_load_from_hex_string_system_test.c )
+target_link_libraries( system_test_state_load_from_hex_string match3 )
+add_test( NAME state_load_from_hex_string_system_test COMMAND system_test_state_load_from_hex_string )

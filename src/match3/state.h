@@ -35,6 +35,12 @@ m3_state_load( const struct m3_state*   state,
                struct m3_options**      options,
                struct m3_cell**         board );
 
+
+// hex_string : 0100000003020305000000000000004142434445414243444541
+int
+m3_state_load_from_hex_string( const struct m3_state*   state,
+                               struct m3_options**      options,
+                               struct m3_cell**         board );
 #ifdef __cplusplus
 }
 #endif

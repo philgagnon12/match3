@@ -352,3 +352,53 @@ m3_state_load( const struct m3_state*   state,
     return ret;
 }
 
+// hex_string : 0100000003020305000000000000004142434445414243444541
+int
+m3_state_load_from_hex_string( const struct m3_state*   state,
+                               struct m3_options**      options,
+                               struct m3_cell**         board )
+{
+    assert(state);
+    assert(options);
+    assert(board);
+
+    int ret = 0;
+
+    struct m3_state state_to_load = M3_STATE_CONST;
+    state_to_load.destroy = &state_destroy;
+
+    size_t buffer_len = state->buffer_size - 1;
+
+    char hex_buffer[3] = {0};
+
+    char* buffer_re = NULL;
+
+    for( size_t l = 0; l < buffer_len; l++ )
+    {
+        hex_buffer[0] = state->buffer[l];
+        if( l + 1 < buffer_len )
+        {
+            hex_buffer[1] = state->buffer[++l];
+        }
+        else
+        {
+            hex_buffer[1] = 0x00;
+        }
+
+        int byte = strtol( hex_buffer, NULL, 16  );
+
+        buffer_re = realloc( state_to_load.buffer, ++state_to_load.buffer_size );
+        assert(buffer_re);
+        state_to_load.buffer = buffer_re;
+        state_to_load.buffer[state_to_load.buffer_size-1] = (char)byte;
+    }
+
+    ret = m3_state_load( &state_to_load,
+                         options,
+                         board );
+
+    m3_state_destroy(&state_to_load);
+
+    return ret;
+}
+
